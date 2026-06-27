@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sonicfield.studio/schemas/preset.schema.json",
+  "title": "SonicField Studio Preset",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "name",
+    "patternMode",
+    "params"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "patternMode": {
+      "type": "string",
+      "enum": [
+        "wave-grid",
+        "radial-cymatics",
+        "lissajous",
+        "sphere-field",
+        "noise-flow"
+      ]
+    },
+    "params": {
+      "type": "object",
+      "required": [
+        "amplitude",
+        "frequency",
+        "phase",
+        "speed",
+        "density",
+        "particleSize",
+        "noiseAmount",
+        "symmetry",
+        "vectorSimplification"
+      ],
+      "properties": {
+        "amplitude": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "frequency": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 20
+        },
+        "phase": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360
+        },
+        "speed": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "density": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 1
+        },
+        "particleSize": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 12
+        },
+        "noiseAmount": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "symmetry": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "vectorSimplification": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "bassInfluence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "midInfluence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "highInfluence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sonicfield.studio/schemas/export.schema.json",
+  "title": "SonicField Studio Export Settings",
+  "type": "object",
+  "required": [
+    "format",
+    "width",
+    "height"
+  ],
+  "properties": {
+    "format": {
+      "type": "string",
+      "enum": [
+        "png",
+        "svg",
+        "json"
+      ]
+    },
+    "width": {
+      "type": "integer",
+      "minimum": 256,
+      "maximum": 8192
+    },
+    "height": {
+      "type": "integer",
+      "minimum": 256,
+      "maximum": 8192
+    },
+    "transparentBackground": {
+      "type": "boolean"
+    },
+    "backgroundColor": {
+      "type": "string"
+    },
+    "maxSvgNodes": {
+      "type": "integer",
+      "minimum": 100,
+      "maximum": 100000
+    },
+    "includeSvgBackground": {
+      "type": "boolean"
+    },
+    "vectorSimplification": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    }
+  },
+  "additionalProperties": false
+}
