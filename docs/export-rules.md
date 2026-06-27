@@ -7,19 +7,19 @@ PNG export should capture the current visual state.
 MVP:
 
 - export active canvas;
-- use current viewport size;
+- use configured raster size or the current viewport-backed canvas;
 - filename: `sonicfield-{preset}-{timestamp}.png`.
+- support transparent background when requested.
 
 Later:
 
-- custom size;
-- transparent background;
 - supersampling;
 - image sequence.
 
 ## SVG Export
 
 SVG export must be native vector.
+SVG export must respect the selected draw mode.
 
 Forbidden:
 
@@ -35,6 +35,12 @@ Allowed:
 - groups;
 - metadata;
 - background rect.
+
+Draw modes:
+
+- Lines Only: path/polyline geometry only.
+- Particles Only: circle geometry only.
+- Lines + Particles: both groups.
 
 ## SVG Optimization
 
@@ -62,6 +68,8 @@ Preset must include:
 - schema version;
 - name;
 - pattern mode;
+- draw mode;
+- animation preference;
 - params;
 - export settings;
 - optional seed.

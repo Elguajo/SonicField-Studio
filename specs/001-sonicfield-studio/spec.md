@@ -3,13 +3,13 @@
 **Feature Branch:** `001-sonicfield-studio`  
 **Created:** 2026-06-26  
 **Status:** Draft  
-**Input:** Build a web application that generates beautiful sound-wave-inspired particle and vector patterns. Users can adjust amplitude and other parameters and export the result either as raster or vector.
+**Input:** Build a web application that generates beautiful sound-wave-inspired static particle and vector patterns. Users can adjust amplitude and other parameters, choose line/particle drawing modes, optionally animate the preview, and export the result either as raster or vector.
 
 ---
 
 ## 1. Product Summary
 
-SonicField Studio is a browser-based generative design tool.
+SonicField Studio is a browser-based generative design tool for creating static visual pattern assets.
 
 It allows designers, motion designers, artists, and creative technologists to generate visual patterns from:
 
@@ -24,7 +24,7 @@ The user controls pattern parameters and exports the result as:
 - SVG for vector editing;
 - JSON preset for later editing.
 
-The product is not a music player, DAW, or generic visualizer. It is a design tool for generating usable visual assets.
+The product is not a music player, DAW, or generic visualizer. It is a design tool for generating usable static visual assets. Preview animation is optional and off by default.
 
 ---
 
@@ -60,12 +60,13 @@ Needs a clean starting point for extending generative systems.
 
 ### US-001: Generate a Pattern
 
-As a designer, I want to open the app and instantly see a beautiful animated pattern, so that I can start exploring without setup.
+As a designer, I want to open the app and instantly see a beautiful static pattern, so that I can start exploring without setup.
 
 **Acceptance Criteria**
 
 - On first load, a default preset renders automatically.
 - The default pattern is visually meaningful, not empty.
+- The default preview is static, not continuously animated.
 - The app does not require login or account setup.
 
 ---
@@ -119,6 +120,39 @@ As a designer, I want to generate or load sound and use it to drive visual defor
 - Uploaded audio loops for preview.
 - Microphone permission denial is handled gracefully.
 - Audio analysis exposes bass, mids, highs, volume, waveform, and frequency arrays.
+- Audio-reactive changes apply when the user explicitly starts an audio source.
+
+---
+
+### US-004A: Choose Drawing Mode
+
+As a designer, I want to choose whether the pattern is made from lines, particles, or both, so that I can generate different asset styles from the same simulation.
+
+**Required Drawing Modes**
+
+1. Lines + Particles
+2. Lines Only
+3. Particles Only
+
+**Acceptance Criteria**
+
+- Draw mode is controlled independently from pattern mode.
+- Raster preview respects the selected draw mode.
+- SVG export respects the selected draw mode.
+- Particles-only SVG export contains editable circle elements and does not require path elements.
+
+---
+
+### US-004B: Optional Preview Animation
+
+As a designer, I want animation to be opt-in, so that the default tool behaves like a static design instrument.
+
+**Acceptance Criteria**
+
+- Preview animation is disabled by default.
+- A visible checkbox or equivalent control enables animation.
+- When animation is disabled, parameter changes still update the preview immediately.
+- Export behavior is deterministic and based on the current static geometry.
 
 ---
 
@@ -194,7 +228,7 @@ The simulation engine must output:
 
 ### FR-002: Raster Renderer
 
-The raster renderer must support realtime visual preview.
+The raster renderer must support static preview by default and optional realtime animation when enabled by the user.
 
 Initial MVP may use Canvas 2D, but planned implementation should support WebGL/Three.js for high-density particles.
 
@@ -203,6 +237,8 @@ Initial MVP may use Canvas 2D, but planned implementation should support WebGL/T
 The vector renderer/exporter must convert simulation output into SVG.
 
 It must not use raster tracing.
+
+The vector exporter must support line, particle, and combined draw modes from the same simulation geometry.
 
 ### FR-004: Audio Analysis
 
@@ -225,6 +261,8 @@ Required state:
 
 - output mode;
 - pattern mode;
+- draw mode;
+- animation enabled flag;
 - audio source;
 - params;
 - active preset;
@@ -242,6 +280,7 @@ The system must support export settings:
 - SVG simplification;
 - max SVG nodes;
 - include background in SVG.
+- draw mode.
 
 ### FR-007: Error Handling
 
@@ -260,7 +299,8 @@ The app must show clear UI errors for:
 
 ### NFR-001: Performance
 
-- Default scene should render smoothly on a modern laptop.
+- Default scene should render quickly as a static pattern on a modern laptop.
+- Optional animation should render smoothly on a modern laptop when enabled.
 - Vector export should complete within a reasonable time for default presets.
 - High-density exports must be capped or simplified.
 
@@ -310,7 +350,8 @@ MVP is successful if:
 2. PNG export works reliably.
 3. SVG export opens in Illustrator/Figma/Inkscape.
 4. The app remains responsive while editing parameters.
-5. The architecture makes it easy to add video export later.
+5. Users can generate line-based, particle-based, and combined static assets.
+6. The architecture makes it easy to add video export later.
 
 ---
 
@@ -325,6 +366,8 @@ MVP is successful if:
 - User switches modes during audio playback.
 - User resizes browser while rendering.
 - User sets density too high for vector output.
+- User switches between lines-only, particles-only, and combined drawing modes.
+- User enables and disables preview animation.
 
 ---
 
@@ -334,4 +377,5 @@ MVP is successful if:
 - No backend is required.
 - Browser APIs are enough for initial audio analysis.
 - Vector export is static SVG only.
+- Preview animation is a convenience for exploration, not the primary output mode.
 - Animated vector export, if needed later, should be SVG sequence rather than one heavy animated SVG.

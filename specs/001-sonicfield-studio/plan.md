@@ -59,6 +59,7 @@ Raster and vector output must represent the same pattern. If each renderer has s
 - dimensions;
 - time;
 - audio frame.
+- optional seed.
 
 It returns:
 
@@ -75,6 +76,8 @@ It returns:
 Starter:
 
 - Canvas 2D for easy MVP verification.
+- Static preview by default.
+- Optional animation only when the user enables it.
 
 Target:
 
@@ -103,6 +106,11 @@ Allowed SVG elements:
 - `desc`.
 
 Vector mode must simplify geometry.
+Vector export must respect the selected draw mode:
+
+- lines only;
+- particles only;
+- lines + particles.
 
 ---
 
@@ -115,7 +123,7 @@ Zustand updates params
   ↓
 Simulation engine recalculates geometry
   ↓
-Viewport renders current mode
+Viewport renders current static mode, or animated mode when enabled
   ↓
 Export reads same geometry
   ↓
@@ -188,6 +196,7 @@ specs/
 - Generate Radial Cymatics.
 - Render to Canvas.
 - Show controls.
+- Keep preview static by default.
 
 ### Milestone 2: Pattern Variety
 
@@ -196,6 +205,7 @@ specs/
 - Add Noise Flow.
 - Add presets.
 - Add randomize/reset.
+- Add line/particle draw mode controls.
 
 ### Milestone 3: Export
 
@@ -226,7 +236,7 @@ specs/
 
 ### Raster
 
-- Use `requestAnimationFrame`.
+- Use `requestAnimationFrame` only when preview animation is enabled.
 - Avoid React state updates per frame.
 - Move heavy per-frame rendering outside React where possible.
 - Use typed arrays when switching to WebGL particles.
@@ -273,6 +283,8 @@ Default SVG nodes: 2,000–8,000
 - Include pattern mode.
 - Include params.
 - Include export settings.
+- Include draw mode.
+- Include animation preference.
 
 ---
 

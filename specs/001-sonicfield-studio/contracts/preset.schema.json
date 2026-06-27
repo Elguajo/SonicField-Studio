@@ -31,6 +31,20 @@
         "noise-flow"
       ]
     },
+    "drawMode": {
+      "type": "string",
+      "enum": [
+        "lines",
+        "particles",
+        "both"
+      ]
+    },
+    "animatePreview": {
+      "type": "boolean"
+    },
+    "seed": {
+      "type": "string"
+    },
     "params": {
       "type": "object",
       "required": [
@@ -104,6 +118,49 @@
           "type": "number",
           "minimum": 0,
           "maximum": 5
+        }
+      },
+      "additionalProperties": false
+    },
+    "exportSettings": {
+      "type": "object",
+      "properties": {
+        "rasterWidth": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "rasterHeight": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "backgroundColor": {
+          "type": "string"
+        },
+        "transparentBackground": {
+          "type": "boolean"
+        },
+        "svgSimplification": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "maxSvgNodes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "includeSvgBackground": {
+          "type": "boolean"
+        },
+        "drawMode": {
+          "type": "string",
+          "enum": [
+            "lines",
+            "particles",
+            "both"
+          ]
         }
       },
       "additionalProperties": false

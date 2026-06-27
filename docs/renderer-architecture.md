@@ -4,7 +4,7 @@
 
 The simulation engine is the only layer allowed to decide geometry.
 
-Renderers only draw or export geometry.
+Renderers only draw or export geometry. They may choose whether to draw lines, particles, or both, but they must not create new pattern logic.
 
 ## Simulation Output
 
@@ -27,6 +27,8 @@ Raster renderer can enhance the visual:
 
 These effects do not need to exist in SVG.
 
+Raster preview is static by default. Animation is opt-in and should only run a requestAnimationFrame loop while enabled.
+
 ## Vector Renderer
 
 Vector renderer must prioritize clean geometry:
@@ -38,6 +40,12 @@ Vector renderer must prioritize clean geometry:
 - metadata.
 
 It should not attempt to reproduce raster-only effects like bloom.
+
+Vector export must respect the selected draw mode:
+
+- Lines Only exports path/polyline-style geometry.
+- Particles Only exports editable circle elements.
+- Lines + Particles exports both groups.
 
 ## Why This Matters
 

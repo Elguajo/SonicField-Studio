@@ -39,13 +39,15 @@
 
 - [x] T021 Implement Canvas 2D raster renderer for MVP.
 - [x] T022 Make renderer consume only simulation geometry.
-- [x] T023 Add animation loop.
+- [x] T023 Add opt-in animation loop with static preview as the default.
 - [x] T024 Add viewport resize handling.
 - [x] T025 Add basic path drawing.
 - [x] T026 Add point rendering.
 - [x] T027 Add optional glow/trail approximation.
 - [x] T028 Ensure parameter changes update preview immediately.
 - [x] T029 Add fallback message if canvas context fails.
+- [x] T029A Add line/particle/both draw mode control.
+- [x] T029B Make raster renderer respect selected draw mode.
 
 ---
 
@@ -60,6 +62,7 @@
 - [x] T036 Add vector simplification parameter.
 - [x] T037 Add warning when SVG estimate is too high.
 - [x] T038 Add download helper for SVG file.
+- [x] T038A Make SVG export respect selected draw mode.
 - [ ] T039 Test SVG opens in browser.
 - [ ] T040 Test SVG opens in Illustrator/Figma/Inkscape if available.
 
@@ -87,6 +90,7 @@
 - [x] T053 Implement JSON preset import.
 - [x] T054 Validate imported JSON against schema.
 - [x] T055 Show clear error for invalid preset.
+- [x] T055A Persist draw mode and animation preference in preset JSON.
 
 ---
 

@@ -1,10 +1,10 @@
 # Product Vision
 
-SonicField Studio should become a simple but powerful generative design tool.
+SonicField Studio should become a simple but powerful generative design tool for static pattern assets.
 
 ## Positioning
 
-A tool for creating visual assets from sound, rhythm, frequency, and mathematical wave systems.
+A tool for creating static visual assets from sound, rhythm, frequency, and mathematical wave systems. Animation can help exploration, but exported assets should be useful as still PNG/SVG artwork first.
 
 ## Use Cases
 
@@ -15,6 +15,7 @@ A tool for creating visual assets from sound, rhythm, frequency, and mathematica
 - Brand pattern systems
 - Abstract visual identities
 - Print-ready vector patterns
+- Particle-only and line-only pattern systems
 
 ## Product Personality
 
@@ -30,6 +31,7 @@ A tool for creating visual assets from sound, rhythm, frequency, and mathematica
 - a DAW;
 - a complex node editor;
 - a video editor;
+- a default-on realtime music visualizer;
 - an AI image generator;
 - a template marketplace in MVP.
 

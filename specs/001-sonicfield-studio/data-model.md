@@ -19,6 +19,12 @@ interface StudioParams {
 }
 ```
 
+## DrawMode
+
+```ts
+type DrawMode = "lines" | "particles" | "both";
+```
+
 ## AudioAnalysisFrame
 
 ```ts
@@ -40,6 +46,7 @@ interface PatternGeometry {
   paths: GeometryPath[];
   meta: {
     estimatedSvgNodeCount: number;
+    warnings: string[];
     warning?: string;
   };
 }
@@ -55,6 +62,9 @@ interface StudioPreset {
   patternMode: PatternMode;
   params: StudioParams;
   exportSettings: ExportSettings;
+  drawMode?: DrawMode;
+  animatePreview?: boolean;
+  seed?: string;
 }
 ```
 
@@ -64,11 +74,11 @@ interface StudioPreset {
 interface ExportSettings {
   rasterWidth: number;
   rasterHeight: number;
-  svgWidth: number;
-  svgHeight: number;
   backgroundColor: string;
   transparentBackground: boolean;
+  svgSimplification: number;
   maxSvgNodes: number;
   includeSvgBackground: boolean;
+  drawMode: DrawMode;
 }
 ```
