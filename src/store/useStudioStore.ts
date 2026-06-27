@@ -9,6 +9,7 @@ import { exportGeometryToSvg } from "@/lib/renderers/vectorExporter";
 import { generatePatternGeometry } from "@/lib/simulation/simulationEngine";
 import type {
   AudioSource,
+  DrawMode,
   ExportSettings,
   OutputMode,
   PatternMode,
@@ -20,6 +21,8 @@ import type {
 interface StudioStore {
   outputMode: OutputMode;
   patternMode: PatternMode;
+  drawMode: DrawMode;
+  isAnimationEnabled: boolean;
   audioSource: AudioSource;
   oscillatorType: OscillatorType;
   params: StudioParams;
@@ -31,6 +34,8 @@ interface StudioStore {
   isExportingSvg: boolean;
   setOutputMode: (mode: OutputMode) => void;
   setPatternMode: (mode: PatternMode) => void;
+  setDrawMode: (mode: DrawMode) => void;
+  setAnimationEnabled: (enabled: boolean) => void;
   setAudioSource: (source: AudioSource) => void;
   setOscillatorType: (type: OscillatorType) => void;
   startOscillator: () => Promise<void>;
@@ -73,12 +78,15 @@ export const defaultExportSettings: ExportSettings = {
   transparentBackground: false,
   svgSimplification: 0.35,
   maxSvgNodes: 15000,
-  includeSvgBackground: true
+  includeSvgBackground: true,
+  drawMode: "both"
 };
 
 export const useStudioStore = create<StudioStore>((set, get) => ({
   outputMode: "raster",
   patternMode: "radial-cymatics",
+  drawMode: "both",
+  isAnimationEnabled: false,
   audioSource: "none",
   oscillatorType: "sine",
   params: defaultParams,
@@ -91,6 +99,15 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
 
   setOutputMode: (mode) => set({ outputMode: mode }),
   setPatternMode: (mode) => set({ patternMode: mode, activePresetId: "custom", activePresetName: "Custom" }),
+  setDrawMode: (mode) =>
+    set((state) => ({
+      drawMode: mode,
+      exportSettings: {
+        ...state.exportSettings,
+        drawMode: mode
+      }
+    })),
+  setAnimationEnabled: (enabled) => set({ isAnimationEnabled: enabled }),
   setAudioSource: (source) => set({ audioSource: source }),
   setOscillatorType: (type) => set({ oscillatorType: type }),
   startOscillator: async () => {
@@ -198,6 +215,7 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
       activePresetId: preset.id,
       activePresetName: preset.name,
       patternMode: preset.patternMode,
+      drawMode: "both",
       params: preset.params
     });
   },
@@ -209,6 +227,8 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
       patternMode: state.patternMode,
       params: state.params,
       exportSettings: state.exportSettings,
+      drawMode: state.drawMode,
+      animatePreview: state.isAnimationEnabled,
       seed: state.activePresetName
     });
 
@@ -237,6 +257,8 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
         activePresetId: "imported",
         activePresetName: snapshot.name,
         patternMode: snapshot.patternMode,
+        drawMode: snapshot.drawMode ?? snapshot.exportSettings.drawMode,
+        isAnimationEnabled: snapshot.animatePreview ?? false,
         params: snapshot.params,
         exportSettings: snapshot.exportSettings,
         notices: [
@@ -302,6 +324,8 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
     set({
       activePresetId: "default-cymatics",
       activePresetName: "Default Cymatics",
+      drawMode: "both",
+      isAnimationEnabled: false,
       params: defaultParams,
       exportSettings: defaultExportSettings,
       notices: []
@@ -369,6 +393,8 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
         maxNodes: exportSettings.maxSvgNodes,
         simplification: exportSettings.svgSimplification,
         includeBackground: exportSettings.includeSvgBackground,
+        includePoints: state.drawMode === "particles" || state.drawMode === "both",
+        includePaths: state.drawMode === "lines" || state.drawMode === "both",
         presetName: state.activePresetName
       });
 

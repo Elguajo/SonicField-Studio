@@ -1,5 +1,7 @@
 export type OutputMode = "raster" | "vector";
 
+export type DrawMode = "lines" | "particles" | "both";
+
 export type PatternMode =
   | "wave-grid"
   | "radial-cymatics"
@@ -36,6 +38,7 @@ export interface ExportSettings {
   svgSimplification: number;
   maxSvgNodes: number;
   includeSvgBackground: boolean;
+  drawMode: DrawMode;
 }
 
 export interface StudioNotice {
@@ -50,6 +53,8 @@ export interface StudioPresetSnapshot {
   patternMode: PatternMode;
   params: StudioParams;
   exportSettings: ExportSettings;
+  drawMode?: DrawMode;
+  animatePreview?: boolean;
   seed?: string;
 }
 

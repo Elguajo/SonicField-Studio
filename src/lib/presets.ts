@@ -131,6 +131,8 @@ export function createPresetSnapshot(input: {
   patternMode: PatternMode;
   params: StudioParams;
   exportSettings: ExportSettings;
+  drawMode?: StudioPresetSnapshot["drawMode"];
+  animatePreview?: boolean;
   seed?: string;
 }): StudioPresetSnapshot {
   return {
@@ -139,6 +141,8 @@ export function createPresetSnapshot(input: {
     patternMode: input.patternMode,
     params: input.params,
     exportSettings: input.exportSettings,
+    drawMode: input.drawMode ?? input.exportSettings.drawMode,
+    animatePreview: input.animatePreview ?? false,
     seed: input.seed
   };
 }
@@ -174,6 +178,7 @@ function validatePresetSnapshot(value: unknown): StudioPresetSnapshot {
 
   const params = validateParams(value.params);
   const exportSettings = isRecord(value.exportSettings) ? validateExportSettings(value.exportSettings) : undefined;
+  const drawMode = isDrawMode(value.drawMode) ? value.drawMode : exportSettings?.drawMode ?? "both";
 
   return {
     schemaVersion: PRESET_SCHEMA_VERSION,
@@ -187,8 +192,11 @@ function validatePresetSnapshot(value: unknown): StudioPresetSnapshot {
       transparentBackground: false,
       svgSimplification: params.vectorSimplification,
       maxSvgNodes: 15000,
-      includeSvgBackground: true
+      includeSvgBackground: true,
+      drawMode
     },
+    drawMode,
+    animatePreview: typeof value.animatePreview === "boolean" ? value.animatePreview : false,
     seed: typeof value.seed === "string" ? value.seed : undefined
   };
 }
@@ -222,7 +230,8 @@ function validateExportSettings(value: Record<string, unknown>): ExportSettings 
     transparentBackground: typeof value.transparentBackground === "boolean" ? value.transparentBackground : false,
     svgSimplification: numberInRange(value.svgSimplification ?? 0.35, "svgSimplification", 0, 1),
     maxSvgNodes: integerInRange(value.maxSvgNodes ?? 15000, "maxSvgNodes", 1, 100000),
-    includeSvgBackground: typeof value.includeSvgBackground === "boolean" ? value.includeSvgBackground : true
+    includeSvgBackground: typeof value.includeSvgBackground === "boolean" ? value.includeSvgBackground : true,
+    drawMode: isDrawMode(value.drawMode) ? value.drawMode : "both"
   };
 }
 
@@ -234,6 +243,10 @@ function isPatternMode(value: unknown): value is PatternMode {
     value === "sphere-field" ||
     value === "noise-flow"
   );
+}
+
+function isDrawMode(value: unknown): value is NonNullable<StudioPresetSnapshot["drawMode"]> {
+  return value === "lines" || value === "particles" || value === "both";
 }
 
 function numberInRange(value: unknown, label: string, min: number, max: number): number {

@@ -13,6 +13,8 @@ describe("exportGeometryToSvg", () => {
       maxNodes: 20,
       simplification: 0.2,
       includeBackground: true,
+      includePoints: true,
+      includePaths: true,
       presetName: "Unit Test"
     });
 
@@ -37,6 +39,8 @@ describe("exportGeometryToSvg", () => {
       maxNodes: 24,
       simplification: 0.6,
       includeBackground: false,
+      includePoints: true,
+      includePaths: true,
       presetName: "Dense"
     });
 
@@ -44,6 +48,25 @@ describe("exportGeometryToSvg", () => {
 
     expect(circleCount).toBeLessThan(200);
     expect(circleCount).toBeGreaterThan(0);
+  });
+
+  it("can export particles without path nodes", () => {
+    const svg = exportGeometryToSvg(createGeometry(12), {
+      width: 320,
+      height: 240,
+      backgroundColor: "#05070d",
+      pointRadius: 1.5,
+      strokeWidth: 1,
+      maxNodes: 20,
+      simplification: 0.2,
+      includeBackground: false,
+      includePoints: true,
+      includePaths: false,
+      presetName: "Particles"
+    });
+
+    expect(svg).toContain("<circle");
+    expect(svg).not.toContain("<path ");
   });
 });
 

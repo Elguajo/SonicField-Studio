@@ -28,6 +28,10 @@ export function ControlPanel() {
   const audioInputRef = useRef<HTMLInputElement | null>(null);
   const params = useStudioStore((state) => state.params);
   const setParam = useStudioStore((state) => state.setParam);
+  const drawMode = useStudioStore((state) => state.drawMode);
+  const setDrawMode = useStudioStore((state) => state.setDrawMode);
+  const isAnimationEnabled = useStudioStore((state) => state.isAnimationEnabled);
+  const setAnimationEnabled = useStudioStore((state) => state.setAnimationEnabled);
   const activePresetId = useStudioStore((state) => state.activePresetId);
   const patternMode = useStudioStore((state) => state.patternMode);
   const setPatternMode = useStudioStore((state) => state.setPatternMode);
@@ -117,6 +121,29 @@ export function ControlPanel() {
           <option value="sphere-field">Sphere Field</option>
           <option value="noise-flow">Noise Flow</option>
         </select>
+
+        <label htmlFor="draw-mode" className="mb-1 mt-3 block text-xs text-studio-muted">
+          Draw Mode
+        </label>
+        <select
+          id="draw-mode"
+          className="w-full rounded-md border border-studio-line bg-studio-bg px-3 py-2 text-sm"
+          value={drawMode}
+          onChange={(event) => setDrawMode(event.target.value as typeof drawMode)}
+        >
+          <option value="both">Lines + Particles</option>
+          <option value="lines">Lines Only</option>
+          <option value="particles">Particles Only</option>
+        </select>
+
+        <label className="mt-3 flex items-center gap-2 text-xs text-studio-muted">
+          <input
+            type="checkbox"
+            checked={isAnimationEnabled}
+            onChange={(event) => setAnimationEnabled(event.target.checked)}
+          />
+          Animate preview
+        </label>
       </section>
 
       <section className="space-y-4">

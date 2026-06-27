@@ -9,6 +9,8 @@ export interface SvgExportOptions {
   maxNodes: number;
   simplification: number;
   includeBackground: boolean;
+  includePoints: boolean;
+  includePaths: boolean;
   presetName: string;
 }
 
@@ -31,25 +33,29 @@ export function exportGeometryToSvg(geometry: PatternGeometry, options: SvgExpor
     ? `<rect width="100%" height="100%" fill="${escapeXml(options.backgroundColor)}" />`
     : "";
 
-  const pointNodes = sampledPoints
-    .map((point) => {
-      return `<circle cx="${round(point.x)}" cy="${round(point.y)}" r="${round(options.pointRadius)}" fill="currentColor" />`;
-    })
-    .join("\n");
+  const pointNodes = options.includePoints
+    ? sampledPoints
+        .map((point) => {
+          return `<circle cx="${round(point.x)}" cy="${round(point.y)}" r="${round(options.pointRadius)}" fill="currentColor" />`;
+        })
+        .join("\n")
+    : "";
 
-  const pathNodes = sampledPaths
-    .map((path) => {
-      const pathBudget = Math.max(2, Math.floor(targetPathPoints / Math.max(1, sampledPaths.length)));
-      const sampledPath = sampleArray(path.points, Math.max(1, Math.ceil(path.points.length / pathBudget)));
-      if (sampledPath.length < 2) return "";
-      const d = sampledPath
-        .map((point, index) => `${index === 0 ? "M" : "L"} ${round(point.x)} ${round(point.y)}`)
-        .join(" ");
+  const pathNodes = options.includePaths
+    ? sampledPaths
+        .map((path) => {
+          const pathBudget = Math.max(2, Math.floor(targetPathPoints / Math.max(1, sampledPaths.length)));
+          const sampledPath = sampleArray(path.points, Math.max(1, Math.ceil(path.points.length / pathBudget)));
+          if (sampledPath.length < 2) return "";
+          const d = sampledPath
+            .map((point, index) => `${index === 0 ? "M" : "L"} ${round(point.x)} ${round(point.y)}`)
+            .join(" ");
 
-      return `<path d="${d}${path.closed ? " Z" : ""}" fill="none" stroke="currentColor" stroke-width="${round(options.strokeWidth)}" />`;
-    })
-    .filter(Boolean)
-    .join("\n");
+          return `<path d="${d}${path.closed ? " Z" : ""}" fill="none" stroke="currentColor" stroke-width="${round(options.strokeWidth)}" />`;
+        })
+        .filter(Boolean)
+        .join("\n")
+    : "";
 
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${options.width}" height="${options.height}" viewBox="0 0 ${options.width} ${options.height}" color="#7dd3fc">`,

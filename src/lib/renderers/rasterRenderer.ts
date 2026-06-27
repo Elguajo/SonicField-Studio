@@ -6,6 +6,7 @@ export interface RasterRenderOptions {
   backgroundColor: string;
   pointColor: string;
   pointRadius: number;
+  drawPoints: boolean;
   drawPaths: boolean;
   glow?: boolean;
   trailOpacity?: number;
@@ -46,18 +47,20 @@ export function renderGeometryToCanvas(
     context.restore();
   }
 
-  context.save();
-  if (options.glow) {
-    context.shadowColor = options.pointColor;
-    context.shadowBlur = 18;
+  if (options.drawPoints) {
+    context.save();
+    if (options.glow) {
+      context.shadowColor = options.pointColor;
+      context.shadowBlur = 18;
+    }
+    context.fillStyle = options.pointColor;
+    for (const point of geometry.points) {
+      context.beginPath();
+      context.arc(point.x, point.y, options.pointRadius, 0, Math.PI * 2);
+      context.fill();
+    }
+    context.restore();
   }
-  context.fillStyle = options.pointColor;
-  for (const point of geometry.points) {
-    context.beginPath();
-    context.arc(point.x, point.y, options.pointRadius, 0, Math.PI * 2);
-    context.fill();
-  }
-  context.restore();
 }
 
 function colorWithAlpha(color: string, alpha: number): string {

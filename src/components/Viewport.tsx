@@ -16,6 +16,8 @@ export function Viewport() {
   } | null>(null);
   const params = useStudioStore((state) => state.params);
   const patternMode = useStudioStore((state) => state.patternMode);
+  const drawMode = useStudioStore((state) => state.drawMode);
+  const isAnimationEnabled = useStudioStore((state) => state.isAnimationEnabled);
   const outputMode = useStudioStore((state) => state.outputMode);
   const audioSource = useStudioStore((state) => state.audioSource);
   const pushNotice = useStudioStore((state) => state.pushNotice);
@@ -61,6 +63,7 @@ export function Viewport() {
       return;
     }
 
+    let renderStaticFrame: (() => void) | null = null;
     const resize = () => {
       const rect = parent.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -69,6 +72,9 @@ export function Viewport() {
       canvas.style.width = `${rect.width}px`;
       canvas.style.height = `${rect.height}px`;
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (!isAnimationEnabled) {
+        renderStaticFrame?.();
+      }
     };
 
     resize();
@@ -93,7 +99,8 @@ export function Viewport() {
           backgroundColor: "#05070d",
           pointColor: outputMode === "vector" ? "#f5f7fb" : "#7dd3fc",
           pointRadius: Math.max(0.75, params.particleSize * 0.35),
-          drawPaths: true,
+          drawPoints: drawMode === "particles" || drawMode === "both",
+          drawPaths: drawMode === "lines" || drawMode === "both",
           glow: outputMode === "raster",
           trailOpacity: 0
         });
@@ -107,7 +114,7 @@ export function Viewport() {
 
     const render = () => {
       const rect = parent.getBoundingClientRect();
-      const time = (performance.now() - start) / 1000;
+      const time = isAnimationEnabled ? (performance.now() - start) / 1000 : 0;
 
       const frameGeometry = generatePatternGeometry({
         params,
@@ -129,13 +136,17 @@ export function Viewport() {
         backgroundColor: "#05070d",
         pointColor: outputMode === "vector" ? "#f5f7fb" : "#7dd3fc",
         pointRadius: Math.max(0.75, params.particleSize * 0.35),
-        drawPaths: true,
+        drawPoints: drawMode === "particles" || drawMode === "both",
+        drawPaths: drawMode === "lines" || drawMode === "both",
         glow: outputMode === "raster",
-        trailOpacity: outputMode === "raster" ? 0.26 : 1
+        trailOpacity: isAnimationEnabled && outputMode === "raster" ? 0.26 : 1
       });
 
-      animationFrame = requestAnimationFrame(render);
+      if (isAnimationEnabled) {
+        animationFrame = requestAnimationFrame(render);
+      }
     };
+    renderStaticFrame = render;
 
     render();
     window.addEventListener("resize", resize);
@@ -145,13 +156,13 @@ export function Viewport() {
       window.removeEventListener("resize", resize);
       setActiveCanvas(null);
     };
-  }, [params, patternMode, outputMode, audioSource, pushNotice]);
+  }, [params, patternMode, drawMode, isAnimationEnabled, outputMode, audioSource, pushNotice]);
 
   return (
     <section className="relative min-h-[520px] overflow-hidden lg:min-h-0">
       <canvas ref={canvasRef} className="h-full w-full" />
       <div className="absolute left-4 top-4 rounded-md border border-studio-line bg-black/30 px-3 py-2 text-xs text-studio-muted backdrop-blur">
-        {outputMode === "raster" ? "Raster preview" : "Vector-safe preview"} · {geometry.points.length} points
+        {outputMode === "raster" ? "Raster preview" : "Vector-safe preview"} · {drawMode} · {isAnimationEnabled ? "animated" : "static"} · {geometry.points.length} points
       </div>
     </section>
   );

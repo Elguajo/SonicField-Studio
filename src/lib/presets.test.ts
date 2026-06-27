@@ -24,7 +24,8 @@ const exportSettings: ExportSettings = {
   transparentBackground: false,
   svgSimplification: 0.35,
   maxSvgNodes: 15000,
-  includeSvgBackground: true
+  includeSvgBackground: true,
+  drawMode: "both"
 };
 
 describe("presets", () => {
