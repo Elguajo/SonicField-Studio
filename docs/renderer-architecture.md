@@ -29,6 +29,10 @@ These effects do not need to exist in SVG.
 
 Raster preview is static by default. Animation is opt-in and should only run a requestAnimationFrame loop while enabled.
 
+Line rendering may smooth simulation paths for presentation, but smoothing must use the shared path points and must not invent separate pattern logic.
+
+Particle rendering should avoid visible overlap by filtering the particle layer deterministically at render time. This filtering must not mutate the shared path geometry.
+
 ## Vector Renderer
 
 Vector renderer must prioritize clean geometry:
@@ -41,10 +45,14 @@ Vector renderer must prioritize clean geometry:
 
 It should not attempt to reproduce raster-only effects like bloom.
 
+Vector paths may use the same smoothing parameter as raster preview, emitted as native SVG path curves.
+
+Vector particle export should avoid overlapping circles before SVG node sampling so exported particle-only artwork remains editable and visually clean.
+
 Vector export must respect the selected draw mode:
 
 - Lines Only exports path/polyline-style geometry.
-- Particles Only exports editable circle elements.
+- Particles Only exports editable non-overlapping circle elements.
 - Lines + Particles exports both groups.
 
 ## Why This Matters

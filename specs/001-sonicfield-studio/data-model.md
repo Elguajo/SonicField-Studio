@@ -13,6 +13,7 @@ interface StudioParams {
   noiseAmount: number;
   symmetry: number;
   vectorSimplification: number;
+  pathSmoothing: number;
   bassInfluence: number;
   midInfluence: number;
   highInfluence: number;

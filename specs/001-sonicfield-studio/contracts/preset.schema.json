@@ -104,6 +104,11 @@
           "minimum": 0,
           "maximum": 1
         },
+        "pathSmoothing": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
         "bassInfluence": {
           "type": "number",
           "minimum": 0,

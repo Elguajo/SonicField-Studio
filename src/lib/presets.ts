@@ -24,6 +24,7 @@ export const presets: StudioPreset[] = [
       noiseAmount: 0.1,
       symmetry: 4,
       vectorSimplification: 0.35,
+      pathSmoothing: 0.74,
       bassInfluence: 0.8,
       midInfluence: 0.5,
       highInfluence: 0.3
@@ -43,6 +44,7 @@ export const presets: StudioPreset[] = [
       noiseAmount: 0.25,
       symmetry: 8,
       vectorSimplification: 0.4,
+      pathSmoothing: 0.78,
       bassInfluence: 1.5,
       midInfluence: 0.8,
       highInfluence: 0.6
@@ -62,6 +64,7 @@ export const presets: StudioPreset[] = [
       noiseAmount: 0,
       symmetry: 5,
       vectorSimplification: 0.2,
+      pathSmoothing: 0.86,
       bassInfluence: 0.4,
       midInfluence: 0.7,
       highInfluence: 0.4
@@ -81,6 +84,7 @@ export const presets: StudioPreset[] = [
       noiseAmount: 0.2,
       symmetry: 9,
       vectorSimplification: 0.5,
+      pathSmoothing: 0.7,
       bassInfluence: 1,
       midInfluence: 0.9,
       highInfluence: 0.6
@@ -100,6 +104,7 @@ export const presets: StudioPreset[] = [
       noiseAmount: 1.4,
       symmetry: 5,
       vectorSimplification: 0.55,
+      pathSmoothing: 0.64,
       bassInfluence: 0.9,
       midInfluence: 1.2,
       highInfluence: 0.8
@@ -119,6 +124,7 @@ export const presets: StudioPreset[] = [
       noiseAmount: 0.05,
       symmetry: 12,
       vectorSimplification: 0.25,
+      pathSmoothing: 0.82,
       bassInfluence: 1.8,
       midInfluence: 0.5,
       highInfluence: 0.2
@@ -133,6 +139,8 @@ export function createPresetSnapshot(input: {
   exportSettings: ExportSettings;
   drawMode?: StudioPresetSnapshot["drawMode"];
   animatePreview?: boolean;
+  paletteId?: string;
+  exportProfileId?: string;
   seed?: string;
 }): StudioPresetSnapshot {
   return {
@@ -143,6 +151,8 @@ export function createPresetSnapshot(input: {
     exportSettings: input.exportSettings,
     drawMode: input.drawMode ?? input.exportSettings.drawMode,
     animatePreview: input.animatePreview ?? false,
+    paletteId: input.paletteId,
+    exportProfileId: input.exportProfileId,
     seed: input.seed
   };
 }
@@ -197,6 +207,8 @@ function validatePresetSnapshot(value: unknown): StudioPresetSnapshot {
     },
     drawMode,
     animatePreview: typeof value.animatePreview === "boolean" ? value.animatePreview : false,
+    paletteId: typeof value.paletteId === "string" ? value.paletteId : undefined,
+    exportProfileId: typeof value.exportProfileId === "string" ? value.exportProfileId : undefined,
     seed: typeof value.seed === "string" ? value.seed : undefined
   };
 }
@@ -216,6 +228,7 @@ function validateParams(value: unknown): StudioParams {
     noiseAmount: numberInRange(value.noiseAmount, "noiseAmount", 0, 5),
     symmetry: integerInRange(value.symmetry, "symmetry", 1, 16),
     vectorSimplification: numberInRange(value.vectorSimplification, "vectorSimplification", 0, 1),
+    pathSmoothing: numberInRange(value.pathSmoothing ?? 0.72, "pathSmoothing", 0, 1),
     bassInfluence: numberInRange(value.bassInfluence ?? 1, "bassInfluence", 0, 5),
     midInfluence: numberInRange(value.midInfluence ?? 0.75, "midInfluence", 0, 5),
     highInfluence: numberInRange(value.highInfluence ?? 0.5, "highInfluence", 0, 5)

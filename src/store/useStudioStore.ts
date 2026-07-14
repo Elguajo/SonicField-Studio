@@ -7,11 +7,22 @@ import { downloadTextFile, slugForFilename, timestampForFilename } from "@/lib/e
 import { createPresetSnapshot, parsePresetJson, presets } from "@/lib/presets";
 import { exportGeometryToSvg } from "@/lib/renderers/vectorExporter";
 import { generatePatternGeometry } from "@/lib/simulation/simulationEngine";
+import {
+  applyExportProfile,
+  applyPaletteToExportSettings,
+  colorPalettes,
+  createGalleryItem,
+  createSeed,
+  exportProfiles,
+  generateDesignVariations
+} from "@/lib/workflow/designerWorkflow";
 import type {
+  AudioAnalysisFrame,
   AudioSource,
+  DesignVariation,
   DrawMode,
   ExportSettings,
-  OutputMode,
+  GalleryItem,
   PatternMode,
   StudioNotice,
   StudioParameterKey,
@@ -19,7 +30,6 @@ import type {
 } from "@/types";
 
 interface StudioStore {
-  outputMode: OutputMode;
   patternMode: PatternMode;
   drawMode: DrawMode;
   isAnimationEnabled: boolean;
@@ -29,10 +39,17 @@ interface StudioStore {
   activePresetId: string;
   activePresetName: string;
   exportSettings: ExportSettings;
+  paletteId: string;
+  exportProfileId: string;
+  activeSeed: string;
+  isSeedLocked: boolean;
+  pointColor: string;
+  frozenAudioFrame: AudioAnalysisFrame | null;
+  variations: DesignVariation[];
+  gallery: GalleryItem[];
   notices: StudioNotice[];
   isExportingPng: boolean;
   isExportingSvg: boolean;
-  setOutputMode: (mode: OutputMode) => void;
   setPatternMode: (mode: PatternMode) => void;
   setDrawMode: (mode: DrawMode) => void;
   setAnimationEnabled: (enabled: boolean) => void;
@@ -44,9 +61,19 @@ interface StudioStore {
   stopAudio: () => void;
   setParam: (key: StudioParameterKey, value: number) => void;
   setExportSetting: <Key extends keyof ExportSettings>(key: Key, value: ExportSettings[Key]) => void;
+  applyPalette: (paletteId: string) => void;
+  applyExportProfile: (profileId: string) => void;
   applyPreset: (presetId: string) => void;
   exportPreset: () => void;
   importPresetJson: (contents: string) => void;
+  lockSeed: () => void;
+  unlockSeed: () => void;
+  generateVariations: () => void;
+  applyVariation: (variationId: string) => void;
+  saveToGallery: () => void;
+  restoreGalleryItem: (itemId: string) => void;
+  freezeCurrentAudioFrame: () => void;
+  clearFrozenAudioFrame: () => void;
   pushNotice: (notice: Omit<StudioNotice, "id">) => void;
   dismissNotice: (id: string) => void;
   clearNotices: () => void;
@@ -66,6 +93,7 @@ export const defaultParams: StudioParams = {
   noiseAmount: 0.3,
   symmetry: 6,
   vectorSimplification: 0.35,
+  pathSmoothing: 0.72,
   bassInfluence: 1,
   midInfluence: 0.75,
   highInfluence: 0.5
@@ -83,7 +111,6 @@ export const defaultExportSettings: ExportSettings = {
 };
 
 export const useStudioStore = create<StudioStore>((set, get) => ({
-  outputMode: "raster",
   patternMode: "radial-cymatics",
   drawMode: "both",
   isAnimationEnabled: false,
@@ -93,11 +120,18 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
   activePresetId: "default-cymatics",
   activePresetName: "Default Cymatics",
   exportSettings: defaultExportSettings,
+  paletteId: colorPalettes[0].id,
+  exportProfileId: "custom",
+  activeSeed: "default-cymatics",
+  isSeedLocked: false,
+  pointColor: colorPalettes[0].primaryColor,
+  frozenAudioFrame: null,
+  variations: [],
+  gallery: [],
   notices: [],
   isExportingPng: false,
   isExportingSvg: false,
 
-  setOutputMode: (mode) => set({ outputMode: mode }),
   setPatternMode: (mode) => set({ patternMode: mode, activePresetId: "custom", activePresetName: "Custom" }),
   setDrawMode: (mode) =>
     set((state) => ({
@@ -192,8 +226,56 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
       exportSettings: {
         ...state.exportSettings,
         [key]: value
-      }
+      },
+      exportProfileId: "custom"
     })),
+
+  applyPalette: (paletteId) => {
+    const palette = colorPalettes.find((item) => item.id === paletteId);
+    if (!palette) return;
+
+    set((state) => ({
+      paletteId: palette.id,
+      pointColor: palette.primaryColor,
+      exportSettings: applyPaletteToExportSettings(state.exportSettings, palette),
+      notices: [
+        ...state.notices,
+        {
+          id: `${Date.now()}-palette`,
+          level: "info" as const,
+          message: `${palette.name} palette applied.`
+        }
+      ].slice(-4)
+    }));
+  },
+
+  applyExportProfile: (profileId) => {
+    if (profileId === "custom") {
+      set({ exportProfileId: "custom" });
+      return;
+    }
+
+    const profile = exportProfiles.find((item) => item.id === profileId);
+    if (!profile) return;
+
+    set((state) => ({
+      exportProfileId: profile.id,
+      exportSettings: applyExportProfile(
+        state.exportSettings,
+        profile,
+        state.drawMode,
+        state.exportSettings.backgroundColor
+      ),
+      notices: [
+        ...state.notices,
+        {
+          id: `${Date.now()}-export-profile`,
+          level: "info" as const,
+          message: `${profile.name} export profile applied.`
+        }
+      ].slice(-4)
+    }));
+  },
 
   applyPreset: (presetId) => {
     const preset = presets.find((item) => item.id === presetId);
@@ -211,13 +293,19 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
       return;
     }
 
-    set({
+    set((state) => ({
       activePresetId: preset.id,
       activePresetName: preset.name,
       patternMode: preset.patternMode,
       drawMode: "both",
-      params: preset.params
-    });
+      params: preset.params,
+      exportSettings: {
+        ...state.exportSettings,
+        drawMode: "both"
+      },
+      activeSeed: preset.id,
+      variations: []
+    }));
   },
 
   exportPreset: () => {
@@ -229,7 +317,9 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
       exportSettings: state.exportSettings,
       drawMode: state.drawMode,
       animatePreview: state.isAnimationEnabled,
-      seed: state.activePresetName
+      paletteId: state.paletteId,
+      exportProfileId: state.exportProfileId,
+      seed: state.activeSeed
     });
 
     downloadTextFile(
@@ -253,14 +343,24 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
   importPresetJson: (contents) => {
     try {
       const snapshot = parsePresetJson(contents);
+      const palette = snapshot.paletteId ? colorPalettes.find((item) => item.id === snapshot.paletteId) : undefined;
+      const drawMode = snapshot.drawMode ?? snapshot.exportSettings.drawMode;
       set((state) => ({
         activePresetId: "imported",
         activePresetName: snapshot.name,
         patternMode: snapshot.patternMode,
-        drawMode: snapshot.drawMode ?? snapshot.exportSettings.drawMode,
+        drawMode,
         isAnimationEnabled: snapshot.animatePreview ?? false,
         params: snapshot.params,
-        exportSettings: snapshot.exportSettings,
+        exportSettings: {
+          ...snapshot.exportSettings,
+          drawMode
+        },
+        paletteId: palette?.id ?? state.paletteId,
+        pointColor: palette?.primaryColor ?? state.pointColor,
+        exportProfileId: snapshot.exportProfileId ?? "custom",
+        activeSeed: snapshot.seed ?? createSeed(snapshot.name),
+        variations: [],
         notices: [
           ...state.notices,
           {
@@ -284,6 +384,136 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
     }
   },
 
+  lockSeed: () =>
+    set((state) => ({
+      isSeedLocked: true,
+      activeSeed: state.activeSeed || createSeed(state.activePresetName)
+    })),
+
+  unlockSeed: () =>
+    set((state) => ({
+      isSeedLocked: false,
+      activeSeed: createSeed(state.activePresetName)
+    })),
+
+  generateVariations: () =>
+    set((state) => ({
+      variations: generateDesignVariations({
+        params: state.params,
+        patternMode: state.patternMode,
+        seed: state.activeSeed || createSeed(state.activePresetName)
+      }),
+      notices: [
+        ...state.notices,
+        {
+          id: `${Date.now()}-variations`,
+          level: "success" as const,
+          message: "Variations generated."
+        }
+      ].slice(-4)
+    })),
+
+  applyVariation: (variationId) => {
+    const variation = get().variations.find((item) => item.id === variationId);
+    if (!variation) return;
+
+    set((state) => ({
+      activePresetId: "variation",
+      activePresetName: variation.name,
+      patternMode: variation.patternMode,
+      params: variation.params,
+      activeSeed: variation.seed,
+      notices: [
+        ...state.notices,
+        {
+          id: `${Date.now()}-variation-apply`,
+          level: "info" as const,
+          message: `${variation.name} applied.`
+        }
+      ].slice(-4)
+    }));
+  },
+
+  saveToGallery: () => {
+    const state = get();
+    const item = createGalleryItem({
+      name: state.activePresetName,
+      patternMode: state.patternMode,
+      drawMode: state.drawMode,
+      params: state.params,
+      exportSettings: state.exportSettings,
+      paletteId: state.paletteId,
+      exportProfileId: state.exportProfileId,
+      seed: state.activeSeed
+    });
+
+    set((current) => ({
+      gallery: [item, ...current.gallery].slice(0, 24),
+      notices: [
+        ...current.notices,
+        {
+          id: `${Date.now()}-gallery-save`,
+          level: "success" as const,
+          message: "Pattern saved to gallery."
+        }
+      ].slice(-4)
+    }));
+  },
+
+  restoreGalleryItem: (itemId) => {
+    const item = get().gallery.find((entry) => entry.id === itemId);
+    if (!item) return;
+
+    const palette = colorPalettes.find((entry) => entry.id === item.paletteId);
+    set((state) => ({
+      activePresetId: "gallery",
+      activePresetName: item.name,
+      patternMode: item.patternMode,
+      drawMode: item.drawMode,
+      params: item.params,
+      exportSettings: item.exportSettings,
+      paletteId: item.paletteId,
+      exportProfileId: item.exportProfileId,
+      pointColor: palette?.primaryColor ?? state.pointColor,
+      activeSeed: item.seed,
+      variations: [],
+      notices: [
+        ...state.notices,
+        {
+          id: `${Date.now()}-gallery-restore`,
+          level: "info" as const,
+          message: "Gallery pattern restored."
+        }
+      ].slice(-4)
+    }));
+  },
+
+  freezeCurrentAudioFrame: () =>
+    set((state) => ({
+      frozenAudioFrame: audioEngine.getFrame(),
+      notices: [
+        ...state.notices,
+        {
+          id: `${Date.now()}-audio-freeze`,
+          level: "info" as const,
+          message: "Audio frame frozen for deterministic export."
+        }
+      ].slice(-4)
+    })),
+
+  clearFrozenAudioFrame: () =>
+    set((state) => ({
+      frozenAudioFrame: null,
+      notices: [
+        ...state.notices,
+        {
+          id: `${Date.now()}-audio-live`,
+          level: "info" as const,
+          message: "Live audio frame restored."
+        }
+      ].slice(-4)
+    })),
+
   pushNotice: (notice) =>
     set((state) => ({
       notices: [
@@ -300,25 +530,24 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
     })),
   clearNotices: () => set({ notices: [] }),
 
-  randomize: () =>
+  randomize: () => {
+    const state = get();
+    const seed = state.isSeedLocked ? state.activeSeed : createSeed("randomized");
+    const [variation] = generateDesignVariations({
+      params: state.params,
+      patternMode: state.patternMode,
+      seed,
+      count: 1
+    });
+
     set(() => ({
       activePresetId: "randomized",
       activePresetName: "Randomized",
-      params: {
-        amplitude: random(0.5, 4),
-        frequency: random(1, 18),
-        phase: random(0, 360),
-        speed: random(0.1, 3),
-        density: random(0.1, 0.8),
-        particleSize: random(0.75, 6),
-        noiseAmount: random(0, 2),
-        symmetry: Math.round(random(2, 12)),
-        vectorSimplification: random(0.1, 0.7),
-        bassInfluence: random(0, 3),
-        midInfluence: random(0, 2),
-        highInfluence: random(0, 2)
-      }
-    })),
+      patternMode: variation?.patternMode ?? state.patternMode,
+      params: variation?.params ?? state.params,
+      activeSeed: state.isSeedLocked ? seed : variation?.seed ?? seed
+    }));
+  },
 
   reset: () =>
     set({
@@ -328,6 +557,13 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
       isAnimationEnabled: false,
       params: defaultParams,
       exportSettings: defaultExportSettings,
+      paletteId: colorPalettes[0].id,
+      exportProfileId: "custom",
+      activeSeed: "default-cymatics",
+      isSeedLocked: false,
+      pointColor: colorPalettes[0].primaryColor,
+      frozenAudioFrame: null,
+      variations: [],
       notices: []
     }),
 
@@ -373,7 +609,7 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
         width: exportSettings.rasterWidth,
         height: exportSettings.rasterHeight,
         time: 0,
-        audio: {
+        audio: state.frozenAudioFrame ?? {
           volume: 0,
           bass: 0,
           mids: 0,
@@ -381,7 +617,7 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
           waveform: [],
           frequency: []
         },
-        seed: state.activePresetName
+        seed: state.activeSeed
       });
 
       const svg = exportGeometryToSvg(geometry, {
@@ -392,10 +628,12 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
         strokeWidth: 1,
         maxNodes: exportSettings.maxSvgNodes,
         simplification: exportSettings.svgSimplification,
+        pathSmoothing: state.params.pathSmoothing,
         includeBackground: exportSettings.includeSvgBackground,
         includePoints: state.drawMode === "particles" || state.drawMode === "both",
         includePaths: state.drawMode === "lines" || state.drawMode === "both",
-        presetName: state.activePresetName
+        presetName: state.activePresetName,
+        foregroundColor: state.pointColor
       });
 
       downloadTextFile(
@@ -433,10 +671,6 @@ export const useStudioStore = create<StudioStore>((set, get) => ({
     }
   }
 }));
-
-function random(min: number, max: number): number {
-  return min + Math.random() * (max - min);
-}
 
 function pushAudioError(
   set: (partial: Partial<StudioStore> | ((state: StudioStore) => Partial<StudioStore>)) => void,

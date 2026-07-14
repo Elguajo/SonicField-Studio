@@ -39,7 +39,7 @@ Allowed:
 Draw modes:
 
 - Lines Only: path/polyline geometry only.
-- Particles Only: circle geometry only.
+- Particles Only: editable, non-overlapping circle geometry only.
 - Lines + Particles: both groups.
 
 ## SVG Optimization
@@ -48,6 +48,8 @@ Apply:
 
 - sampling;
 - simplification;
+- path smoothing;
+- particle overlap filtering;
 - max node count;
 - grouped layers;
 - rounded coordinates.
@@ -73,3 +75,5 @@ Preset must include:
 - params;
 - export settings;
 - optional seed.
+
+Preset params include `pathSmoothing` from `0` to `1`. Older preset files that omit it should load with the app default.

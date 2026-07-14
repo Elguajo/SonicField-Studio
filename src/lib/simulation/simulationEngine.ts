@@ -225,6 +225,7 @@ function normalizeInput(input: GeneratePatternGeometryInput): GeneratePatternGeo
       noiseAmount: clamp(finiteNumber(input.params.noiseAmount, 0.3), 0, 8),
       symmetry: Math.max(1, Math.round(clamp(finiteNumber(input.params.symmetry, 6), 1, 32))),
       vectorSimplification: clamp(finiteNumber(input.params.vectorSimplification, 0.35), 0, 1),
+      pathSmoothing: clamp(finiteNumber(input.params.pathSmoothing, 0.72), 0, 1),
       bassInfluence: clamp(finiteNumber(input.params.bassInfluence, 1), 0, 4),
       midInfluence: clamp(finiteNumber(input.params.midInfluence, 0.75), 0, 4),
       highInfluence: clamp(finiteNumber(input.params.highInfluence, 0.5), 0, 4)

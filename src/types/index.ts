@@ -1,5 +1,3 @@
-export type OutputMode = "raster" | "vector";
-
 export type DrawMode = "lines" | "particles" | "both";
 
 export type PatternMode =
@@ -13,6 +11,25 @@ export type AudioSource = "none" | "oscillator" | "file" | "microphone";
 
 export type NoticeLevel = "info" | "warning" | "error" | "success";
 
+export interface ColorPalette {
+  id: string;
+  name: string;
+  backgroundColor: string;
+  primaryColor: string;
+  secondaryColor: string;
+}
+
+export interface ExportProfile {
+  id: string;
+  name: string;
+  rasterWidth: number;
+  rasterHeight: number;
+  maxSvgNodes: number;
+  svgSimplification: number;
+  transparentBackground: boolean;
+  includeSvgBackground: boolean;
+}
+
 export interface StudioParams {
   amplitude: number;
   frequency: number;
@@ -23,6 +40,7 @@ export interface StudioParams {
   noiseAmount: number;
   symmetry: number;
   vectorSimplification: number;
+  pathSmoothing: number;
   bassInfluence: number;
   midInfluence: number;
   highInfluence: number;
@@ -55,7 +73,30 @@ export interface StudioPresetSnapshot {
   exportSettings: ExportSettings;
   drawMode?: DrawMode;
   animatePreview?: boolean;
+  paletteId?: string;
+  exportProfileId?: string;
   seed?: string;
+}
+
+export interface DesignVariation {
+  id: string;
+  name: string;
+  patternMode: PatternMode;
+  params: StudioParams;
+  seed: string;
+}
+
+export interface GalleryItem {
+  id: string;
+  name: string;
+  createdAt: string;
+  patternMode: PatternMode;
+  drawMode: DrawMode;
+  params: StudioParams;
+  exportSettings: ExportSettings;
+  paletteId: string;
+  exportProfileId: string;
+  seed: string;
 }
 
 export interface AudioAnalysisFrame {

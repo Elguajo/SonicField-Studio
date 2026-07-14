@@ -18,8 +18,11 @@ export function Viewport() {
   const patternMode = useStudioStore((state) => state.patternMode);
   const drawMode = useStudioStore((state) => state.drawMode);
   const isAnimationEnabled = useStudioStore((state) => state.isAnimationEnabled);
-  const outputMode = useStudioStore((state) => state.outputMode);
   const audioSource = useStudioStore((state) => state.audioSource);
+  const activeSeed = useStudioStore((state) => state.activeSeed);
+  const backgroundColor = useStudioStore((state) => state.exportSettings.backgroundColor);
+  const pointColor = useStudioStore((state) => state.pointColor);
+  const frozenAudioFrame = useStudioStore((state) => state.frozenAudioFrame);
   const pushNotice = useStudioStore((state) => state.pushNotice);
 
   const geometry = useMemo(() => {
@@ -36,9 +39,10 @@ export function Viewport() {
         highs: 0,
         waveform: [],
         frequency: []
-      }
+      },
+      seed: activeSeed
     });
-  }, [params, patternMode]);
+  }, [activeSeed, params, patternMode]);
 
   useEffect(() => {
     if (!geometry.meta.warning) return;
@@ -96,12 +100,13 @@ export function Viewport() {
         renderGeometryToCanvas(transparentContext, latestFrame.geometry, {
           width: latestFrame.width,
           height: latestFrame.height,
-          backgroundColor: "#05070d",
-          pointColor: outputMode === "vector" ? "#f5f7fb" : "#7dd3fc",
+          backgroundColor,
+          pointColor,
           pointRadius: Math.max(0.75, params.particleSize * 0.35),
           drawPoints: drawMode === "particles" || drawMode === "both",
           drawPaths: drawMode === "lines" || drawMode === "both",
-          glow: outputMode === "raster",
+          pathSmoothing: params.pathSmoothing,
+          glow: false,
           trailOpacity: 0
         });
 
@@ -122,7 +127,8 @@ export function Viewport() {
         width: rect.width,
         height: rect.height,
         time,
-        audio: audioSource === "none" ? emptyAudioFrame : audioEngine.getFrame()
+        audio: frozenAudioFrame ?? (audioSource === "none" ? emptyAudioFrame : audioEngine.getFrame()),
+        seed: activeSeed
       });
       latestFrameRef.current = {
         geometry: frameGeometry,
@@ -133,13 +139,14 @@ export function Viewport() {
       renderGeometryToCanvas(context, frameGeometry, {
         width: rect.width,
         height: rect.height,
-        backgroundColor: "#05070d",
-        pointColor: outputMode === "vector" ? "#f5f7fb" : "#7dd3fc",
+        backgroundColor,
+        pointColor,
         pointRadius: Math.max(0.75, params.particleSize * 0.35),
         drawPoints: drawMode === "particles" || drawMode === "both",
         drawPaths: drawMode === "lines" || drawMode === "both",
-        glow: outputMode === "raster",
-        trailOpacity: isAnimationEnabled && outputMode === "raster" ? 0.26 : 1
+        pathSmoothing: params.pathSmoothing,
+        glow: false,
+        trailOpacity: 1
       });
 
       if (isAnimationEnabled) {
@@ -156,13 +163,13 @@ export function Viewport() {
       window.removeEventListener("resize", resize);
       setActiveCanvas(null);
     };
-  }, [params, patternMode, drawMode, isAnimationEnabled, outputMode, audioSource, pushNotice]);
+  }, [activeSeed, backgroundColor, frozenAudioFrame, params, patternMode, drawMode, isAnimationEnabled, audioSource, pointColor, pushNotice]);
 
   return (
     <section className="relative min-h-[520px] overflow-hidden lg:min-h-0">
       <canvas ref={canvasRef} className="h-full w-full" />
       <div className="absolute left-4 top-4 rounded-md border border-studio-line bg-black/30 px-3 py-2 text-xs text-studio-muted backdrop-blur">
-        {outputMode === "raster" ? "Raster preview" : "Vector-safe preview"} · {drawMode} · {isAnimationEnabled ? "animated" : "static"} · {geometry.points.length} points
+        Preview · {drawMode} · {isAnimationEnabled ? "animated" : "static"} · {geometry.points.length} points
       </div>
     </section>
   );

@@ -12,6 +12,7 @@ const params: StudioParams = {
   noiseAmount: 0.2,
   symmetry: 6,
   vectorSimplification: 0.35,
+  pathSmoothing: 0.72,
   bassInfluence: 1,
   midInfluence: 0.75,
   highInfluence: 0.5
@@ -39,6 +40,10 @@ describe("presets", () => {
       patternMode: "radial-cymatics",
       params,
       exportSettings,
+      drawMode: "particles",
+      animatePreview: true,
+      paletteId: "electric-ink",
+      exportProfileId: "poster-4x5",
       seed: "poster-test"
     });
 
@@ -47,6 +52,22 @@ describe("presets", () => {
 
   it("rejects invalid JSON", () => {
     expect(() => parsePresetJson("{")).toThrow("Invalid preset JSON.");
+  });
+
+  it("keeps old preset JSON valid when workflow fields are missing", () => {
+    const snapshot = {
+      schemaVersion: "1.0",
+      name: "Legacy Preset",
+      patternMode: "wave-grid",
+      params,
+      exportSettings
+    };
+
+    expect(parsePresetJson(JSON.stringify(snapshot))).toMatchObject({
+      name: "Legacy Preset",
+      drawMode: "both",
+      animatePreview: false
+    });
   });
 
   it("rejects out-of-range preset params", () => {

@@ -15,10 +15,12 @@ describe("exportGeometryToSvg", () => {
       includeBackground: true,
       includePoints: true,
       includePaths: true,
-      presetName: "Unit Test"
+      presetName: "Unit Test",
+      foregroundColor: "#ff4d5a"
     });
 
     expect(svg).toContain("<svg");
+    expect(svg).toContain('color="#ff4d5a"');
     expect(svg).toContain("<title>SonicField Studio Export</title>");
     expect(svg).toContain("<desc>");
     expect(svg).toContain('<g id="paths">');
@@ -67,6 +69,40 @@ describe("exportGeometryToSvg", () => {
 
     expect(svg).toContain("<circle");
     expect(svg).not.toContain("<path ");
+  });
+
+  it("removes overlapping particle circles from SVG export", () => {
+    const svg = exportGeometryToSvg(
+      {
+        points: [
+          { x: 0, y: 0 },
+          { x: 1, y: 0 },
+          { x: 4, y: 0 }
+        ],
+        paths: [],
+        meta: {
+          estimatedSvgNodeCount: 3,
+          warnings: []
+        }
+      },
+      {
+        width: 320,
+        height: 240,
+        backgroundColor: "#05070d",
+        pointRadius: 1,
+        strokeWidth: 1,
+        maxNodes: 20,
+        simplification: 0,
+        includeBackground: false,
+        includePoints: true,
+        includePaths: false,
+        presetName: "Particles"
+      }
+    );
+
+    const circleCount = [...svg.matchAll(/<circle /g)].length;
+
+    expect(circleCount).toBe(2);
   });
 });
 

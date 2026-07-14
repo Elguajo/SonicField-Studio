@@ -12,6 +12,7 @@ const baseParams: StudioParams = {
   noiseAmount: 0.3,
   symmetry: 6,
   vectorSimplification: 0.35,
+  pathSmoothing: 0.72,
   bassInfluence: 1,
   midInfluence: 0.75,
   highInfluence: 0.5

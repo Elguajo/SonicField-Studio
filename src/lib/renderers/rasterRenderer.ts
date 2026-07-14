@@ -1,4 +1,6 @@
 import type { PatternGeometry } from "@/types";
+import { filterNonOverlappingPoints } from "@/lib/renderers/particleLayout";
+import { drawSmoothedPath } from "@/lib/renderers/pathSmoothing";
 
 export interface RasterRenderOptions {
   width: number;
@@ -8,6 +10,7 @@ export interface RasterRenderOptions {
   pointRadius: number;
   drawPoints: boolean;
   drawPaths: boolean;
+  pathSmoothing?: number;
   glow?: boolean;
   trailOpacity?: number;
 }
@@ -36,12 +39,7 @@ export function renderGeometryToCanvas(
     for (const path of geometry.paths) {
       if (path.points.length < 2) continue;
       context.beginPath();
-      context.moveTo(path.points[0].x, path.points[0].y);
-      for (let index = 1; index < path.points.length; index++) {
-        const point = path.points[index];
-        context.lineTo(point.x, point.y);
-      }
-      if (path.closed) context.closePath();
+      drawSmoothedPath(context, path.points, path.closed, options.pathSmoothing ?? 0);
       context.stroke();
     }
     context.restore();
@@ -54,7 +52,10 @@ export function renderGeometryToCanvas(
       context.shadowBlur = 18;
     }
     context.fillStyle = options.pointColor;
-    for (const point of geometry.points) {
+    const points = filterNonOverlappingPoints(geometry.points, {
+      pointRadius: options.pointRadius
+    });
+    for (const point of points) {
       context.beginPath();
       context.arc(point.x, point.y, options.pointRadius, 0, Math.PI * 2);
       context.fill();

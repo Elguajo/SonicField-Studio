@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { presets } from "@/lib/presets";
+import { colorPalettes, exportProfiles } from "@/lib/workflow/designerWorkflow";
 import { useStudioStore } from "@/store/useStudioStore";
 import type { StudioParameterKey } from "@/types";
 
@@ -20,7 +21,8 @@ const controls: Array<{
   { key: "particleSize", label: "Particle Size", min: 0.5, max: 12, step: 0.1 },
   { key: "noiseAmount", label: "Noise", min: 0, max: 5, step: 0.01 },
   { key: "symmetry", label: "Symmetry", min: 1, max: 16, step: 1 },
-  { key: "vectorSimplification", label: "Vector Simplification", min: 0, max: 1, step: 0.01 }
+  { key: "vectorSimplification", label: "Vector Simplification", min: 0, max: 1, step: 0.01 },
+  { key: "pathSmoothing", label: "Path Smoothing", min: 0, max: 1, step: 0.01 }
 ];
 
 export function ControlPanel() {
@@ -42,6 +44,23 @@ export function ControlPanel() {
   const dismissNotice = useStudioStore((state) => state.dismissNotice);
   const exportSettings = useStudioStore((state) => state.exportSettings);
   const setExportSetting = useStudioStore((state) => state.setExportSetting);
+  const paletteId = useStudioStore((state) => state.paletteId);
+  const applyPalette = useStudioStore((state) => state.applyPalette);
+  const exportProfileId = useStudioStore((state) => state.exportProfileId);
+  const applyExportProfile = useStudioStore((state) => state.applyExportProfile);
+  const isSeedLocked = useStudioStore((state) => state.isSeedLocked);
+  const lockSeed = useStudioStore((state) => state.lockSeed);
+  const unlockSeed = useStudioStore((state) => state.unlockSeed);
+  const activeSeed = useStudioStore((state) => state.activeSeed);
+  const variations = useStudioStore((state) => state.variations);
+  const generateVariations = useStudioStore((state) => state.generateVariations);
+  const applyVariation = useStudioStore((state) => state.applyVariation);
+  const gallery = useStudioStore((state) => state.gallery);
+  const saveToGallery = useStudioStore((state) => state.saveToGallery);
+  const restoreGalleryItem = useStudioStore((state) => state.restoreGalleryItem);
+  const frozenAudioFrame = useStudioStore((state) => state.frozenAudioFrame);
+  const freezeCurrentAudioFrame = useStudioStore((state) => state.freezeCurrentAudioFrame);
+  const clearFrozenAudioFrame = useStudioStore((state) => state.clearFrozenAudioFrame);
   const audioSource = useStudioStore((state) => state.audioSource);
   const oscillatorType = useStudioStore((state) => state.oscillatorType);
   const setOscillatorType = useStudioStore((state) => state.setOscillatorType);
@@ -106,6 +125,29 @@ export function ControlPanel() {
           ))}
         </select>
 
+        <div className="mt-4">
+          <h3 className="mb-2 text-xs font-medium text-studio-muted">Palette</h3>
+          <div className="grid grid-cols-2 gap-2">
+            {colorPalettes.map((palette) => (
+              <button
+                key={palette.id}
+                type="button"
+                className={`flex min-h-10 items-center gap-2 rounded-md border px-2 py-2 text-left text-xs ${
+                  palette.id === paletteId ? "border-studio-accent text-studio-text" : "border-studio-line text-studio-muted"
+                }`}
+                onClick={() => applyPalette(palette.id)}
+                aria-pressed={palette.id === paletteId}
+              >
+                <span className="flex shrink-0 overflow-hidden rounded-sm border border-white/10">
+                  <span className="h-4 w-4" style={{ backgroundColor: palette.backgroundColor }} />
+                  <span className="h-4 w-4" style={{ backgroundColor: palette.primaryColor }} />
+                </span>
+                <span className="truncate">{palette.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         <label htmlFor="pattern-mode" className="sr-only">
           Pattern mode
         </label>
@@ -144,6 +186,90 @@ export function ControlPanel() {
           />
           Animate preview
         </label>
+      </section>
+
+      <section className="mb-5 space-y-3">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-studio-muted">
+          Workflow
+        </h2>
+
+        <label htmlFor="export-profile" className="mb-1 block text-xs text-studio-muted">
+          Export Profile
+        </label>
+        <select
+          id="export-profile"
+          className="w-full rounded-md border border-studio-line bg-studio-bg px-3 py-2 text-sm"
+          value={exportProfileId}
+          onChange={(event) => applyExportProfile(event.target.value)}
+        >
+          <option value="custom">Custom</option>
+          {exportProfiles.map((profile) => (
+            <option key={profile.id} value={profile.id}>
+              {profile.name}
+            </option>
+          ))}
+        </select>
+
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            className="rounded-md border border-studio-line px-3 py-2 text-sm"
+            onClick={isSeedLocked ? unlockSeed : lockSeed}
+          >
+            {isSeedLocked ? "Unlock Seed" : "Lock Seed"}
+          </button>
+          <button type="button" className="rounded-md border border-studio-line px-3 py-2 text-sm" onClick={generateVariations}>
+            Variations
+          </button>
+        </div>
+
+        <p className="truncate text-xs text-studio-muted" title={activeSeed}>
+          Seed: {activeSeed}
+        </p>
+
+        {variations.length > 0 ? (
+          <div className="grid grid-cols-2 gap-2">
+            {variations.map((variation) => (
+              <button
+                key={variation.id}
+                type="button"
+                className="rounded-md border border-studio-line px-3 py-2 text-left text-xs text-studio-muted hover:text-studio-text"
+                onClick={() => applyVariation(variation.id)}
+              >
+                {variation.name}
+              </button>
+            ))}
+          </div>
+        ) : null}
+
+        <div className="grid grid-cols-2 gap-2">
+          <button type="button" className="rounded-md border border-studio-line px-3 py-2 text-sm" onClick={saveToGallery}>
+            Save Shot
+          </button>
+          <button
+            type="button"
+            className="rounded-md border border-studio-line px-3 py-2 text-sm"
+            onClick={frozenAudioFrame ? clearFrozenAudioFrame : freezeCurrentAudioFrame}
+          >
+            {frozenAudioFrame ? "Live Audio" : "Freeze Audio"}
+          </button>
+        </div>
+
+        {gallery.length > 0 ? (
+          <div className="space-y-2">
+            {gallery.slice(0, 4).map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className="flex w-full items-center justify-between gap-3 rounded-md border border-studio-line px-3 py-2 text-left text-xs"
+                onClick={() => restoreGalleryItem(item.id)}
+              >
+                <span className="truncate">{item.name}</span>
+                <span className="shrink-0 text-studio-muted">{item.patternMode}</span>
+              </button>
+            ))}
+          </div>
+        ) : null}
       </section>
 
       <section className="space-y-4">

@@ -120,6 +120,8 @@
 - [x] T072 Add export settings panel.
 - [x] T073 Add visual warning for vector-heavy scenes.
 - [x] T074 Add loading/disabled states.
+- [x] T074A Add path smoothing control for raster and SVG paths.
+- [x] T074B Prevent visible particle overlap in raster and SVG output.
 - [ ] T075 Add keyboard navigation checks.
 - [x] T076 Add empty/error states.
 
@@ -139,6 +141,8 @@
 - [ ] T086 Test microphone denied flow.
 - [x] T087 Test high-density vector warning.
 - [x] T088 Review implementation against constitution.
+- [x] T089 Test path smoothing and particle overlap export behavior.
+- [x] T090 Run typecheck, tests, lint, and build after smoothing/no-overlap changes.
 
 ---
 
