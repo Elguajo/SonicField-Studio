@@ -2,6 +2,10 @@
 
 **Audio-driven pattern generator with raster (PNG) and vector (SVG) export.**
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+
 SonicField Studio is a Next.js + TypeScript app that renders cymatics-style geometric patterns from a shared simulation engine, previews them live on a WebGL canvas, and exports the exact same geometry as a raster PNG or a clean, editable SVG — no bitmap tracing involved.
 
 ![SonicField Studio — Radial Cymatics preview](docs/screenshots/main-view.png)
@@ -137,4 +141,4 @@ all pass.
 
 ## License
 
-No license has been specified yet. All rights reserved by the repository owner until a license is added.
+Licensed under the [GNU General Public License v3.0](LICENSE).
