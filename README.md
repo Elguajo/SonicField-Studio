@@ -1,129 +1,140 @@
 # SonicField Studio
 
-**SonicField Studio** — стартовый Spec Kit-пакет для разработки веб-приложения, которое генерирует красивые звуковые/математические паттерны и экспортирует результат в **растр** и **вектор**.
+**Audio-driven pattern generator with raster (PNG) and vector (SVG) export.**
 
-Проект собран под workflow GitHub Spec Kit:
+SonicField Studio is a Next.js + TypeScript app that renders cymatics-style geometric patterns from a shared simulation engine, previews them live on a WebGL canvas, and exports the exact same geometry as a raster PNG or a clean, editable SVG — no bitmap tracing involved.
 
-1. Constitution
-2. Specify
-3. Plan
-4. Tasks
-5. Implement
+![SonicField Studio — Radial Cymatics preview](docs/screenshots/main-view.png)
 
-## Что внутри
+## Table of Contents
 
-```txt
-.specify/
-  memory/constitution.md
-  templates/agent-context.md
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [How It Works](#how-it-works)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Available Scripts](#available-scripts)
+- [Project Structure](#project-structure)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [License](#license)
 
-specs/
-  001-sonicfield-studio/
-    spec.md
-    plan.md
-    tasks.md
-    research.md
-    data-model.md
-    quickstart.md
-    checklists/requirements.md
-    contracts/preset.schema.json
-    contracts/export.schema.json
+## Features
 
-docs/
-  product-vision.md
-  renderer-architecture.md
-  export-rules.md
+- **Shared simulation engine** — one source of truth for pattern geometry (points, paths, metadata) consumed by both renderers, so raster and vector output never drift apart.
+- **5 pattern modes** — Wave Grid, Radial Cymatics, Lissajous, Sphere Field, Noise Flow.
+- **3 draw modes** — Lines Only, Particles Only, or Lines + Particles.
+- **Live parameter control** — amplitude, frequency, phase, speed, density, particle size, noise, symmetry, vector simplification, and path smoothing.
+- **Curated palettes and presets** — Electric Ink, Print Graphite, Signal Red, Mineral Green, plus ready-made pattern presets.
+- **Audio-reactive input** — drive the pattern with an oscillator, a loaded audio file, or the microphone.
+- **Designer workflow tools** — lock seed, generate variations, freeze audio, export profiles (Poster 4:5, Square Social, Wide Wallpaper, Transparent Asset), and save/import JSON presets.
+- **Raster export (PNG)** — configurable resolution, optional transparent background.
+- **Vector export (SVG)** — native geometry export with sampling, simplification, path smoothing, and overlap-free particle export, guarded by a configurable node-count limit and warnings for overly dense scenes.
 
-prompts/
-  speckit-commands.md
-  implementation-prompt.md
+## Screenshots
 
-app/
-src/
-package.json
-tailwind.config.ts
-tsconfig.json
-```
+| Radial Cymatics (Electric Ink) | Orbital Sphere (Signal Red) | Noise Flow — Particles Only (Mineral Green) |
+| --- | --- | --- |
+| ![Radial Cymatics pattern](docs/screenshots/main-view.png) | ![Orbital Sphere pattern](docs/screenshots/orbital-sphere-signal-red.png) | ![Noise Flow particles pattern](docs/screenshots/noise-flow-mineral-green.png) |
 
-## Главная идея
+## How It Works
 
-Приложение должно иметь **один общий simulation engine**, который считает точки, линии, кривые и геометрию паттерна, и два независимых renderer/export слоя:
+The **simulation engine** is the only layer allowed to decide geometry — it returns points, paths, metadata, and warnings. Renderers only draw or export that geometry:
 
-- **Raster mode** — realtime preview через WebGL/Three.js и экспорт PNG.
-- **Vector mode** — нативная генерация SVG из геометрии, без трассировки растра.
+- **Raster renderer** — realtime WebGL/Three.js preview, may add presentation-only effects (glow, blur, trails, particle depth) and smooth paths for display, but never invents new pattern logic.
+- **Vector renderer** — generates native SVG (circles, paths, polylines, groups) straight from geometry, filters overlapping particles before sampling, and respects the selected draw mode. Screenshot-to-SVG and bitmap tracing are explicitly forbidden.
 
-## Быстрый старт для ИИ-агента
+See [`docs/renderer-architecture.md`](docs/renderer-architecture.md) and [`docs/export-rules.md`](docs/export-rules.md) for the full contract.
 
-Открой проект в Cursor / Claude Code / Codex / Copilot и сначала дай агенту файл:
+## Tech Stack
 
-```txt
-prompts/implementation-prompt.md
-```
+- [Next.js 15](https://nextjs.org/) + [React 19](https://react.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Three.js](https://threejs.org/) / [@react-three/fiber](https://docs.pmnd.rs/react-three-fiber) for the raster preview
+- [Paper.js](http://paperjs.org/) / [Two.js](https://two.js.org/) for vector geometry
+- [Zustand](https://zustand-demo.pmnd.rs/) for state management
+- [Tailwind CSS](https://tailwindcss.com/) for UI styling
+- [Vitest](https://vitest.dev/) for unit tests
 
-Затем попроси работать строго по:
+## Getting Started
 
-```txt
-.specify/memory/constitution.md
-specs/001-sonicfield-studio/spec.md
-specs/001-sonicfield-studio/plan.md
-specs/001-sonicfield-studio/tasks.md
-```
+### Prerequisites
 
-## Если используешь официальный Spec Kit CLI
+- Node.js 18.18 or newer
+- npm
 
-Можно создать чистый проект через CLI, а затем перенести туда эти файлы:
+### Installation
 
 ```bash
-specify init sonicfield-studio --integration copilot
-cd sonicfield-studio
-```
-
-После этого скопируй содержимое этого архива в корень проекта.
-
-Дальше в агенте:
-
-```txt
-/speckit.constitution
-/speckit.specify
-/speckit.plan
-/speckit.tasks
-/speckit.implement
-```
-
-В этом архиве эти документы уже подготовлены вручную, поэтому агент может сразу начать с анализа `tasks.md`.
-
-## Старт Next.js
-
-```bash
+git clone https://github.com/Elguajo/SonicField-Studio.git
+cd SonicField-Studio
 npm install
+```
+
+### Run the dev server
+
+```bash
 npm run dev
 ```
 
-Открой:
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Available Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the Next.js development server |
+| `npm run build` | Build the app for production |
+| `npm run start` | Serve the production build |
+| `npm run lint` | Run ESLint |
+| `npm run test` | Run the Vitest test suite |
+| `npm run typecheck` | Run the TypeScript compiler in check-only mode |
+
+## Project Structure
 
 ```txt
-http://localhost:3000
+app/                      Next.js app router entry point
+src/
+  components/              UI: TopBar, ControlPanel, Viewport
+  lib/
+    simulation/            Shared simulation engine (geometry source of truth)
+    renderers/              Raster renderer, vector exporter, particle layout, path smoothing
+    workflow/               Designer workflow (variations, seeds, export profiles)
+    presets.ts               Built-in and JSON preset handling
+  store/                    Zustand store (useStudioStore)
+  types/                    Shared TypeScript types
+docs/                      Architecture and export-rule documentation
+specs/001-sonicfield-studio/  Spec Kit artifacts (spec, plan, tasks, data model, contracts)
 ```
 
-## Важное ограничение
+## Documentation
 
-Не нужно пытаться экспортировать 100 000 частиц в SVG как есть. Для vector mode обязательно использовать:
+This project follows the [GitHub Spec Kit](https://github.com/github/spec-kit) workflow. Detailed specs live under [`specs/001-sonicfield-studio/`](specs/001-sonicfield-studio/):
 
-- лимит плотности;
-- sampling;
-- simplification;
-- path/line/contour представление;
-- предупреждение пользователю при слишком тяжёлом SVG.
+- [`spec.md`](specs/001-sonicfield-studio/spec.md) — feature specification
+- [`plan.md`](specs/001-sonicfield-studio/plan.md) — implementation plan
+- [`tasks.md`](specs/001-sonicfield-studio/tasks.md) — task breakdown
+- [`data-model.md`](specs/001-sonicfield-studio/data-model.md) — data model
+- [`contracts/`](specs/001-sonicfield-studio/contracts/) — preset and export JSON schemas
 
-## MVP
+Architecture notes:
 
-MVP считается готовым, когда пользователь может:
+- [`docs/renderer-architecture.md`](docs/renderer-architecture.md) — simulation/renderer contract
+- [`docs/export-rules.md`](docs/export-rules.md) — PNG/SVG/preset export rules and limits
+- [`docs/product-vision.md`](docs/product-vision.md) — product vision
 
-1. Открыть приложение.
-2. Увидеть красивый дефолтный паттерн.
-3. Менять amplitude, frequency, phase, speed, symmetry, noise, density.
-4. Переключать pattern mode.
-5. Включать oscillator или загрузить аудио.
-6. Экспортировать PNG.
-7. Экспортировать SVG.
-8. Сохранить/загрузить JSON preset.
+## Contributing
+
+Issues and pull requests are welcome. Before opening a PR, please make sure:
+
+```bash
+npm run lint
+npm run typecheck
+npm run test
+```
+
+all pass.
+
+## License
+
+No license has been specified yet. All rights reserved by the repository owner until a license is added.
