@@ -25,6 +25,13 @@ const controls: Array<{
   { key: "pathSmoothing", label: "Path Smoothing", min: 0, max: 1, step: 0.01 }
 ];
 
+const selectStyles =
+  "w-full rounded-md border border-studio-line bg-studio-panel2 px-3 py-2 text-sm text-studio-text transition-colors focus:border-studio-accentFocus focus:outline-none";
+const buttonSecondaryStyles =
+  "rounded-md border border-studio-line bg-studio-panel2 px-3 py-2 text-sm font-medium text-studio-text transition-colors hover:border-studio-lineStrong";
+const numberInputStyles =
+  "mt-1 w-full rounded-md border border-studio-line bg-studio-panel2 px-2 py-1 text-sm text-studio-text transition-colors focus:border-studio-accentFocus focus:outline-none";
+
 export function ControlPanel() {
   const presetInputRef = useRef<HTMLInputElement | null>(null);
   const audioInputRef = useRef<HTMLInputElement | null>(null);
@@ -74,13 +81,13 @@ export function ControlPanel() {
   const exportSvg = useStudioStore((state) => state.exportSvg);
 
   return (
-    <aside className="max-h-none overflow-y-auto border-t border-studio-line bg-studio-panel p-4 lg:max-h-full lg:border-l lg:border-t-0">
+    <aside className="max-h-none overflow-y-auto border-t border-studio-line bg-studio-panel p-5 lg:max-h-full lg:border-l lg:border-t-0">
       {notices.length > 0 ? (
         <section className="mb-5 space-y-2" aria-label="Studio notices" aria-live="polite">
           {notices.map((notice) => (
             <div
               key={notice.id}
-              className="flex items-start justify-between gap-3 rounded-md border border-studio-line bg-studio-bg px-3 py-2 text-xs"
+              className="flex items-start justify-between gap-3 rounded-md border border-studio-line bg-studio-panel2 px-3 py-2 text-xs"
               role={notice.level === "error" ? "alert" : "status"}
             >
               <p className={notice.level === "error" ? "text-red-200" : "text-studio-muted"}>
@@ -109,7 +116,7 @@ export function ControlPanel() {
         </label>
         <select
           id="preset-selector"
-          className="mb-3 w-full rounded-md border border-studio-line bg-studio-bg px-3 py-2 text-sm"
+          className={`mb-3 ${selectStyles}`}
           value={presets.some((preset) => preset.id === activePresetId) ? activePresetId : "current"}
           onChange={(event) => {
             if (event.target.value !== "current") {
@@ -132,8 +139,10 @@ export function ControlPanel() {
               <button
                 key={palette.id}
                 type="button"
-                className={`flex min-h-10 items-center gap-2 rounded-md border px-2 py-2 text-left text-xs ${
-                  palette.id === paletteId ? "border-studio-accent text-studio-text" : "border-studio-line text-studio-muted"
+                className={`flex min-h-10 items-center gap-2 rounded-md border bg-studio-panel2 px-2 py-2 text-left text-xs transition-colors ${
+                  palette.id === paletteId
+                    ? "border-studio-accent text-studio-text"
+                    : "border-studio-line text-studio-muted hover:border-studio-lineStrong"
                 }`}
                 onClick={() => applyPalette(palette.id)}
                 aria-pressed={palette.id === paletteId}
@@ -153,7 +162,7 @@ export function ControlPanel() {
         </label>
         <select
           id="pattern-mode"
-          className="w-full rounded-md border border-studio-line bg-studio-bg px-3 py-2 text-sm"
+          className={`mt-3 ${selectStyles}`}
           value={patternMode}
           onChange={(event) => setPatternMode(event.target.value as never)}
         >
@@ -169,7 +178,7 @@ export function ControlPanel() {
         </label>
         <select
           id="draw-mode"
-          className="w-full rounded-md border border-studio-line bg-studio-bg px-3 py-2 text-sm"
+          className={selectStyles}
           value={drawMode}
           onChange={(event) => setDrawMode(event.target.value as typeof drawMode)}
         >
@@ -198,7 +207,7 @@ export function ControlPanel() {
         </label>
         <select
           id="export-profile"
-          className="w-full rounded-md border border-studio-line bg-studio-bg px-3 py-2 text-sm"
+          className={selectStyles}
           value={exportProfileId}
           onChange={(event) => applyExportProfile(event.target.value)}
         >
@@ -211,14 +220,10 @@ export function ControlPanel() {
         </select>
 
         <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            className="rounded-md border border-studio-line px-3 py-2 text-sm"
-            onClick={isSeedLocked ? unlockSeed : lockSeed}
-          >
+          <button type="button" className={buttonSecondaryStyles} onClick={isSeedLocked ? unlockSeed : lockSeed}>
             {isSeedLocked ? "Unlock Seed" : "Lock Seed"}
           </button>
-          <button type="button" className="rounded-md border border-studio-line px-3 py-2 text-sm" onClick={generateVariations}>
+          <button type="button" className={buttonSecondaryStyles} onClick={generateVariations}>
             Variations
           </button>
         </div>
@@ -233,7 +238,7 @@ export function ControlPanel() {
               <button
                 key={variation.id}
                 type="button"
-                className="rounded-md border border-studio-line px-3 py-2 text-left text-xs text-studio-muted hover:text-studio-text"
+                className="rounded-md border border-studio-line bg-studio-panel2 px-3 py-2 text-left text-xs text-studio-muted transition-colors hover:border-studio-lineStrong hover:text-studio-text"
                 onClick={() => applyVariation(variation.id)}
               >
                 {variation.name}
@@ -243,12 +248,12 @@ export function ControlPanel() {
         ) : null}
 
         <div className="grid grid-cols-2 gap-2">
-          <button type="button" className="rounded-md border border-studio-line px-3 py-2 text-sm" onClick={saveToGallery}>
+          <button type="button" className={buttonSecondaryStyles} onClick={saveToGallery}>
             Save Shot
           </button>
           <button
             type="button"
-            className="rounded-md border border-studio-line px-3 py-2 text-sm"
+            className={buttonSecondaryStyles}
             onClick={frozenAudioFrame ? clearFrozenAudioFrame : freezeCurrentAudioFrame}
           >
             {frozenAudioFrame ? "Live Audio" : "Freeze Audio"}
@@ -261,7 +266,7 @@ export function ControlPanel() {
               <button
                 key={item.id}
                 type="button"
-                className="flex w-full items-center justify-between gap-3 rounded-md border border-studio-line px-3 py-2 text-left text-xs"
+                className="flex w-full items-center justify-between gap-3 rounded-md border border-studio-line bg-studio-panel2 px-3 py-2 text-left text-xs text-studio-text transition-colors hover:border-studio-lineStrong"
                 onClick={() => restoreGalleryItem(item.id)}
               >
                 <span className="truncate">{item.name}</span>
@@ -310,7 +315,7 @@ export function ControlPanel() {
         </label>
         <select
           id="oscillator-type"
-          className="mb-3 w-full rounded-md border border-studio-line bg-studio-bg px-3 py-2 text-sm"
+          className={`mb-3 ${selectStyles}`}
           value={oscillatorType}
           onChange={(event) => setOscillatorType(event.target.value as OscillatorType)}
         >
@@ -321,20 +326,16 @@ export function ControlPanel() {
         </select>
 
         <div className="grid grid-cols-2 gap-2">
-          <button type="button" className="rounded-md border border-studio-line px-3 py-2 text-sm" onClick={startOscillator}>
+          <button type="button" className={buttonSecondaryStyles} onClick={startOscillator}>
             Start Osc
           </button>
-          <button
-            type="button"
-            className="rounded-md border border-studio-line px-3 py-2 text-sm"
-            onClick={() => audioInputRef.current?.click()}
-          >
+          <button type="button" className={buttonSecondaryStyles} onClick={() => audioInputRef.current?.click()}>
             Load Audio
           </button>
-          <button type="button" className="rounded-md border border-studio-line px-3 py-2 text-sm" onClick={connectMicrophone}>
+          <button type="button" className={buttonSecondaryStyles} onClick={connectMicrophone}>
             Microphone
           </button>
-          <button type="button" className="rounded-md border border-studio-line px-3 py-2 text-sm" onClick={stopAudio}>
+          <button type="button" className={buttonSecondaryStyles} onClick={stopAudio}>
             Stop Audio
           </button>
           <input
@@ -355,7 +356,7 @@ export function ControlPanel() {
       <section className="mt-6 grid grid-cols-2 gap-2">
         <button
           type="button"
-          className="rounded-md bg-studio-accent px-3 py-2 text-sm font-medium text-black disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-md bg-studio-accent px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-studio-accentHover disabled:cursor-not-allowed disabled:opacity-50"
           onClick={exportPng}
           disabled={isExportingPng}
         >
@@ -363,7 +364,7 @@ export function ControlPanel() {
         </button>
         <button
           type="button"
-          className="rounded-md border border-studio-line px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+          className={`${buttonSecondaryStyles} disabled:cursor-not-allowed disabled:opacity-50`}
           onClick={exportSvg}
           disabled={isExportingSvg}
         >
@@ -380,7 +381,7 @@ export function ControlPanel() {
           <label className="block text-xs text-studio-muted">
             PNG Width
             <input
-              className="mt-1 w-full rounded-md border border-studio-line bg-studio-bg px-2 py-1 text-sm text-studio-text"
+              className={numberInputStyles}
               type="number"
               min={1}
               max={10000}
@@ -391,7 +392,7 @@ export function ControlPanel() {
           <label className="block text-xs text-studio-muted">
             PNG Height
             <input
-              className="mt-1 w-full rounded-md border border-studio-line bg-studio-bg px-2 py-1 text-sm text-studio-text"
+              className={numberInputStyles}
               type="number"
               min={1}
               max={10000}
@@ -404,7 +405,7 @@ export function ControlPanel() {
         <label className="block text-xs text-studio-muted">
           SVG Node Limit
           <input
-            className="mt-1 w-full rounded-md border border-studio-line bg-studio-bg px-2 py-1 text-sm text-studio-text"
+            className={numberInputStyles}
             type="number"
             min={1}
             max={100000}
@@ -446,14 +447,10 @@ export function ControlPanel() {
       </label>
 
       <section className="mt-3 grid grid-cols-2 gap-2">
-        <button type="button" className="rounded-md border border-studio-line px-3 py-2 text-sm" onClick={exportPreset}>
+        <button type="button" className={buttonSecondaryStyles} onClick={exportPreset}>
           Export Preset
         </button>
-        <button
-          type="button"
-          className="rounded-md border border-studio-line px-3 py-2 text-sm"
-          onClick={() => presetInputRef.current?.click()}
-        >
+        <button type="button" className={buttonSecondaryStyles} onClick={() => presetInputRef.current?.click()}>
           Import Preset
         </button>
         <input

@@ -4,9 +4,9 @@
   "private": true,
   "description": "Audio-driven raster and vector pattern generator built with Spec Kit workflow.",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 3033",
     "build": "next build",
-    "start": "next start",
+    "start": "next start --port 3033",
     "lint": "eslint .",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"

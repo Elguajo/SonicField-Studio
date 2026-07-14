@@ -10,3 +10,4 @@ coverage
 .vercel
 .serena
 *.tsbuildinfo
+.claude/settings.local.json

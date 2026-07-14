@@ -168,7 +168,7 @@ export function Viewport() {
   return (
     <section className="relative min-h-[520px] overflow-hidden lg:min-h-0">
       <canvas ref={canvasRef} className="h-full w-full" />
-      <div className="absolute left-4 top-4 rounded-md border border-studio-line bg-black/30 px-3 py-2 text-xs text-studio-muted backdrop-blur">
+      <div className="absolute left-4 top-4 rounded-md border border-studio-line bg-studio-panel/80 px-3 py-2 font-mono text-xs text-studio-muted backdrop-blur">
         Preview · {drawMode} · {isAnimationEnabled ? "animated" : "static"} · {geometry.points.length} points
       </div>
     </section>
