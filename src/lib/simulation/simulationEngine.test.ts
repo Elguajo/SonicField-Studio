@@ -15,7 +15,8 @@ const baseParams: StudioParams = {
   pathSmoothing: 0.72,
   bassInfluence: 1,
   midInfluence: 0.75,
-  highInfluence: 0.5
+  highInfluence: 0.5,
+  order: 0
 };
 
 const emptyAudio: AudioAnalysisFrame = {

@@ -159,7 +159,8 @@ export function generateDesignVariations(input: {
         pathSmoothing: clamp(input.params.pathSmoothing + range(random, -0.18, 0.18), 0, 1),
         bassInfluence: clamp(input.params.bassInfluence + range(random, -0.45, 0.75), 0, 5),
         midInfluence: clamp(input.params.midInfluence + range(random, -0.35, 0.55), 0, 5),
-        highInfluence: clamp(input.params.highInfluence + range(random, -0.35, 0.55), 0, 5)
+        highInfluence: clamp(input.params.highInfluence + range(random, -0.35, 0.55), 0, 5),
+        order: clamp(input.params.order + range(random, -0.2, 0.2), 0, 1)
       }
     };
   });

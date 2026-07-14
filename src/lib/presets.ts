@@ -27,7 +27,8 @@ export const presets: StudioPreset[] = [
       pathSmoothing: 0.74,
       bassInfluence: 0.8,
       midInfluence: 0.5,
-      highInfluence: 0.3
+      highInfluence: 0.3,
+      order: 0
     }
   },
   {
@@ -47,7 +48,8 @@ export const presets: StudioPreset[] = [
       pathSmoothing: 0.78,
       bassInfluence: 1.5,
       midInfluence: 0.8,
-      highInfluence: 0.6
+      highInfluence: 0.6,
+      order: 0
     }
   },
   {
@@ -67,7 +69,8 @@ export const presets: StudioPreset[] = [
       pathSmoothing: 0.86,
       bassInfluence: 0.4,
       midInfluence: 0.7,
-      highInfluence: 0.4
+      highInfluence: 0.4,
+      order: 0
     }
   },
   {
@@ -87,7 +90,8 @@ export const presets: StudioPreset[] = [
       pathSmoothing: 0.7,
       bassInfluence: 1,
       midInfluence: 0.9,
-      highInfluence: 0.6
+      highInfluence: 0.6,
+      order: 0
     }
   },
   {
@@ -107,7 +111,8 @@ export const presets: StudioPreset[] = [
       pathSmoothing: 0.64,
       bassInfluence: 0.9,
       midInfluence: 1.2,
-      highInfluence: 0.8
+      highInfluence: 0.8,
+      order: 0
     }
   },
   {
@@ -127,7 +132,8 @@ export const presets: StudioPreset[] = [
       pathSmoothing: 0.82,
       bassInfluence: 1.8,
       midInfluence: 0.5,
-      highInfluence: 0.2
+      highInfluence: 0.2,
+      order: 0.6
     }
   }
 ];
@@ -231,7 +237,8 @@ function validateParams(value: unknown): StudioParams {
     pathSmoothing: numberInRange(value.pathSmoothing ?? 0.72, "pathSmoothing", 0, 1),
     bassInfluence: numberInRange(value.bassInfluence ?? 1, "bassInfluence", 0, 5),
     midInfluence: numberInRange(value.midInfluence ?? 0.75, "midInfluence", 0, 5),
-    highInfluence: numberInRange(value.highInfluence ?? 0.5, "highInfluence", 0, 5)
+    highInfluence: numberInRange(value.highInfluence ?? 0.5, "highInfluence", 0, 5),
+    order: numberInRange(value.order ?? 0, "order", 0, 1)
   };
 }
 

@@ -44,6 +44,7 @@ export interface StudioParams {
   bassInfluence: number;
   midInfluence: number;
   highInfluence: number;
+  order: number;
 }
 
 export type StudioParameterKey = keyof StudioParams;

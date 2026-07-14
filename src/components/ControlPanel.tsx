@@ -22,7 +22,8 @@ const controls: Array<{
   { key: "noiseAmount", label: "Noise", min: 0, max: 5, step: 0.01 },
   { key: "symmetry", label: "Symmetry", min: 1, max: 16, step: 1 },
   { key: "vectorSimplification", label: "Vector Simplification", min: 0, max: 1, step: 0.01 },
-  { key: "pathSmoothing", label: "Path Smoothing", min: 0, max: 1, step: 0.01 }
+  { key: "pathSmoothing", label: "Path Smoothing", min: 0, max: 1, step: 0.01 },
+  { key: "order", label: "Order", min: 0, max: 1, step: 0.01 }
 ];
 
 const selectStyles =

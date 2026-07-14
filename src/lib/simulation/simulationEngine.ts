@@ -93,6 +93,7 @@ function generateRadialCymatics({ params, width, height, time, audio, seed }: Ge
         value: radialWave
       };
 
+      snapToPolarGrid(point, params.order, cx, cy, params.symmetry * 4, maxRadius / rings);
       points.push(point);
       ringPoints.push(point);
     }
@@ -147,12 +148,15 @@ function generateSphereField({ params, width, height, time, audio }: GeneratePat
     const y3 = Math.sin(theta) * Math.sin(phi) * r;
     const z3 = Math.cos(phi) * r;
     const perspective = 1 / (1 + z3 / 1200);
-    points.push({
+    const point = {
       x: cx + x3 * perspective,
       y: cy + y3 * perspective,
       z: z3,
       value: wave
-    });
+    };
+
+    snapToPolarGrid(point, params.order, cx, cy, Math.max(12, params.symmetry * 3), radius / 8);
+    points.push(point);
   }
 
   return withMeta({ points, paths: [] });
@@ -185,6 +189,34 @@ function generateNoiseFlow({ params, width, height, time, seed }: GeneratePatter
   }
 
   return withMeta({ points, paths });
+}
+
+function snapToPolarGrid(
+  point: GeometryPoint,
+  order: number,
+  cx: number,
+  cy: number,
+  angularSteps: number,
+  radialStep: number
+): void {
+  if (order <= 0) return;
+
+  const dx = point.x - cx;
+  const dy = point.y - cy;
+  const radius = Math.sqrt(dx * dx + dy * dy);
+  const angle = Math.atan2(dy, dx);
+
+  const angularStepSize = (Math.PI * 2) / Math.max(3, Math.round(angularSteps));
+  const snappedAngle = Math.round(angle / angularStepSize) * angularStepSize;
+  const snappedRadiusStep = Math.max(1, radialStep);
+  const snappedRadius = Math.round(radius / snappedRadiusStep) * snappedRadiusStep;
+
+  point.x = lerp(point.x, cx + Math.cos(snappedAngle) * snappedRadius, order);
+  point.y = lerp(point.y, cy + Math.sin(snappedAngle) * snappedRadius, order);
+}
+
+function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
 }
 
 function withMeta(input: Omit<PatternGeometry, "meta">): PatternGeometry {
@@ -228,7 +260,8 @@ function normalizeInput(input: GeneratePatternGeometryInput): GeneratePatternGeo
       pathSmoothing: clamp(finiteNumber(input.params.pathSmoothing, 0.72), 0, 1),
       bassInfluence: clamp(finiteNumber(input.params.bassInfluence, 1), 0, 4),
       midInfluence: clamp(finiteNumber(input.params.midInfluence, 0.75), 0, 4),
-      highInfluence: clamp(finiteNumber(input.params.highInfluence, 0.5), 0, 4)
+      highInfluence: clamp(finiteNumber(input.params.highInfluence, 0.5), 0, 4),
+      order: clamp(finiteNumber(input.params.order, 0), 0, 1)
     },
     audio: {
       volume: clamp(finiteNumber(input.audio.volume, 0), 0, 1),
